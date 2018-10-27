@@ -2,16 +2,20 @@
 
        // Node::Node(): {}
 
-    Node* Node::getParent() {
-        return parent;
+    Node Node::getParent() {
+        return *parent;
     }
 
-    void Node::setParent(Node* parent) { //I'm not sure about this either I'm using same pointer or same value of pointer
+    void Node::setParent(Node* parent) { //I'm not sure about this either I'm using same pointer or same value of pointert
         parent = parent;
     }
 
-    Node* Node::getChildren(std::string child) { //spezielles child aus liste
-        return ;
+    Node Node::getChildren(std::string child) { //spezielles child aus liste
+            for (auto& i: children){
+                if(i->getName() == child){
+                    return *i;
+                }
+            }
     }
 
     std::string Node::getName() {
@@ -46,8 +50,12 @@
         children.push_back(child);
     }
 
-    void Node::removeChildren(std::string child) { //get the node with the name child an then remove it; have to traverse through the whole tree
-        children.remove(child->name);
+    void Node::removeChildren(std::string child) { 
+        for(auto& i:children){
+            if(i->getName() == child) {
+                children.remove(i);
+            }
+        }
     }
 
     /*
