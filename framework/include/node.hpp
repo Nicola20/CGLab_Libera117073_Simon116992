@@ -1,14 +1,15 @@
+#ifndef NODE_HPP
+#define NODE_HPP
+
 #include <string>
 #include <list>
 #include <glm/mat4x4.hpp>
-#include <math.h>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/glm.hpp>
 
 class Node {
     public:
         //Node();
-        Node* getParent();
+        Node getParent();
         void setParent(Node* parent);
         Node getChildren(std::string child);
         std::string getName();
@@ -31,3 +32,4 @@ class Node {
         glm::mat4 worldTransform;
 
 }; 
+#endif

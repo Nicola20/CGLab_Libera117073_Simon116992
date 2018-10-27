@@ -5,9 +5,9 @@ class GeometryNode: public Node {
 
     public:
         model getGeometry();
-        void setGeometry(model geo); 
+        void setGeometry(model const& geo); 
 
     private:
         model geometry;
 
-}
+};

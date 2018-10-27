@@ -4,6 +4,6 @@ model GeometryNode::getGeometry() {
     return geometry;
 }
 
-void GeometryNode::setGeometry(model geo) {
+void GeometryNode::setGeometry(model const& geo) {
     geometry = geo;
 }
