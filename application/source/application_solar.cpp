@@ -133,12 +133,35 @@ void ApplicationSolar::initializeGeometry() {
 ///////////////////////////// callback functions for window events ////////////
 // handle key input
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
-  if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+  //moves forwards
+  if ((key == GLFW_KEY_W || key == GLFW_KEY_UP)  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -0.1f});
     uploadView();
   }
-  else if (key == GLFW_KEY_S  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+  //moves backwards
+  else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN)  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 0.1f});
+    uploadView();
+  }
+  //moves to the left
+  else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT)  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform = glm::translate(m_view_transform, glm::fvec3{-0.1f, 0.0f, 0.1f});
+    uploadView();
+  }
+  //moves to the right
+  else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.1f, 0.0f, 0.1f});
+    uploadView();
+  }
+  //muss mir hier noch etwas passendes ausdenken
+  //moves up
+  else if (key == GLFW_KEY_U  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.1f, 0.1f});
+    uploadView();
+  }
+  //moves down
+  else if (key == GLFW_KEY_SPACE  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, -0.1f, 0.1f});
     uploadView();
   }
 }
