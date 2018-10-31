@@ -4,6 +4,9 @@
 #include "application.hpp"
 #include "model.hpp"
 #include "structs.hpp"
+#include "scenegraph.hpp"
+#include "geometrynode.hpp"
+#include "cameranode.hpp"
 
 // gpu representation of model
 class ApplicationSolar : public Application {
@@ -26,6 +29,7 @@ class ApplicationSolar : public Application {
  protected:
   void initializeShaderPrograms();
   void initializeGeometry();
+  SceneGraph initializeSceneGraph();
   // update uniform values
   void uploadUniforms();
   // upload projection matrix
@@ -40,6 +44,8 @@ class ApplicationSolar : public Application {
   glm::fmat4 m_view_transform;
   // camera projection matrix
   glm::fmat4 m_view_projection;
+
+  SceneGraph solar_;
 };
 
 #endif
