@@ -24,9 +24,12 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,planet_object{}
  ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
+ ,solar_{}
 {
   initializeGeometry();
   initializeShaderPrograms();
+  //initializeSceneGraph();
+  solar_ = initializeSceneGraph();
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -35,7 +38,54 @@ ApplicationSolar::~ApplicationSolar() {
   glDeleteVertexArrays(1, &planet_object.vertex_AO);
 }
 
+SceneGraph ApplicationSolar::initializeSceneGraph() {
+  GeometryNode* sun = new GeometryNode{"sun", 1.0f, 0.0f,0.0f};  
+  SceneGraph solarsystem {"solarsystem", sun};
+  //model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
+/*
+  planet sun{1.0f, 0.0f, 0.0f};
+  planet Merkur(0.383f, 3.012f, 0.5f);
+  planet Venus(0.950f, 1.177f, 0.723f);
+  planet Erde(1.0f, 1.0f, 1.0f);
+  planet Mars(0.583f, 0.53f, 1.524f);
+  planet Jupiter(10.97f, 0.084f, 4.2f);
+  planet Saturn(9.14f, 0.0339f, 6.54f);
+  planet Uranus(3.98f, 0.0119f, 8.19f);
+  planet Neptun(3.87f, 0.006f, 9.1f);*/
+
+  GeometryNode* mercury = new GeometryNode{"mercury", 0.383f, 3.012f, 0.5f};
+  sun->addChildren(mercury);
+  //sun->setGeometry(planet_model);
+  GeometryNode* venus = new GeometryNode{"venus",0.950f, 1.177f, 0.723f};
+  sun->addChildren(venus);
+  GeometryNode* earth = new GeometryNode{"earth", 1.0f, 1.0f, 1.0f};
+  sun->addChildren(earth);
+  GeometryNode* moon = new GeometryNode{"moon", 0.003f, 1.0f, 1.01f};
+  earth->addChildren(moon);
+  GeometryNode* mars = new GeometryNode{"mars", 0.583f, 0.53f, 1.524f};
+  sun->addChildren(mars);
+  GeometryNode* jupiter = new GeometryNode{"jupiter", 10.97f, 0.084f, 4.2f};
+  sun->addChildren(jupiter);
+  GeometryNode* saturn = new GeometryNode{"saturn", 9.14f, 0.0339f, 6.54f};
+  sun->addChildren(saturn);
+  GeometryNode* uranus = new GeometryNode{"uranus", 3.98f, 0.0119f, 8.19f};
+  sun->addChildren(uranus);
+  GeometryNode* neptune = new GeometryNode{"neptune",3.87f, 0.006f, 9.1f};
+  sun->addChildren(neptune);
+/*
+  for(auto& i: solarsystem.getRoot()->getListOfChildren()){
+    i->setGeometry(planet_model); //not quite working yet
+  }*/
+  return solarsystem;
+
+}
+
+
 void ApplicationSolar::render() const {
+
+  for (auto& i: solar_.getRoot()->getListOfChildren()) {
+
+  
   // bind shader to upload uniforms
   glUseProgram(m_shaders.at("planet").handle);
 
@@ -53,7 +103,8 @@ void ApplicationSolar::render() const {
   glBindVertexArray(planet_object.vertex_AO);
 
   // draw bound vertex array using bound shader
-  glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
+  glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL)
+  }
 }
 
 void ApplicationSolar::uploadView() {
@@ -153,7 +204,6 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.1f, 0.0f, 0.1f});
     uploadView();
   }
-  //muss mir hier noch etwas passendes ausdenken
   //moves up
   else if (key == GLFW_KEY_U  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.1f, 0.1f});
@@ -168,7 +218,10 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 
 //handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
-  // mouse handling
+  // mouse handling; not perfected yet
+  m_view_transform = glm::rotate(m_view_transform, float(pos_x)/100, glm::fvec3{0.0f, -1.0f, 0.0f});
+  m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, float(pos_y)/100, 0.0f});
+  uploadView();
 }
 
 //handle resizing
