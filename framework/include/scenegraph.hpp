@@ -1,15 +1,18 @@
 #include "node.hpp"
+#include <iostream>
 
 class SceneGraph {
     public:
-        std::string getName();
-        Node getRoot();
-        //std::string printGraph();
+    SceneGraph();
+        SceneGraph(std::string name, Node* root);
+        std::string getName() const;
+        Node* getRoot() const;
+        //std::string printGraph() const;
     private:
         void setName(std::string name);
-        void setRoot (Node root);
+        void setRoot (Node* root);
 
-        std::string name;
-        Node root;
+        std::string name_;
+        Node* root_;
 
 };

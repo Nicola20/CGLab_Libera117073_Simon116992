@@ -5,31 +5,35 @@
 #include <list>
 #include <glm/mat4x4.hpp>
 #include <glm/glm.hpp>
+#include <algorithm>
+#include <iostream>
 
 class Node {
     public:
-        //Node();
-        Node getParent();
+        Node(std::string name, Node* parent, glm::mat4 localtransform);
+        Node(std::string name);
+        Node* getParent() const;
         void setParent(Node* parent);
-        Node getChildren(std::string child);
-        std::string getName();
-        std::string getPath();
-        int getDepth();
-        glm::mat4 getLocalTransform();
+        Node* getChildren(std::string child) const;
+        std::string getName() const;
+        std::string getPath() const;
+        int getDepth() const;
+        glm::mat4 getLocalTransform() const;
         void setLocalTransform(glm::mat4 local);
-        glm::mat4 getWorldTransform();
+        glm::mat4 getWorldTransform() const;
         void setWorldTransform(glm::mat4 local);
         void addChildren(Node* child);
-        void removeChildren(std::string child);
+        Node* removeChildren(std::string child);
+        std::list<Node*> getListOfChildren();
 
     private:
-        Node* parent;
-        std::list<Node*> children;
-        std::string name;
-        std::string path;
-        int depth;
-        glm::mat4 localTransform;
-        glm::mat4 worldTransform;
+        Node* parent_;
+        std::list<Node*> children_;
+        std::string name_;
+        std::string path_;
+        int depth_;
+        glm::mat4 localTransform_;
+        glm::mat4 worldTransform_;
 
 }; 
 #endif

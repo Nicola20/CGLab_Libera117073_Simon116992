@@ -1,69 +1,74 @@
 #include "node.hpp"
 
-       // Node::Node(): {}
+    Node::Node(std::string name, Node* parent, glm::mat4 localtransform):
+        name_{name},
+        parent_{parent},
+        localTransform_{localtransform}{
+            std::cout<<"Node created \n";
+        }
 
-    Node Node::getParent() {
-        return *parent;
+    Node::Node(std::string name):
+    name_{name} {}
+
+    Node* Node::getParent() const {
+        return parent_;
     }
 
     void Node::setParent(Node* parent) { //I'm not sure about this either I'm using same pointer or same value of pointert
-        parent = parent;
+        parent_ = parent;
     }
 
-    Node Node::getChildren(std::string child) { //spezielles child aus liste
-            for (auto& i: children){
-                if(i->getName() == child){
-                    return *i;
-                }
+    Node* Node::getChildren(std::string child) const { //spezielles child aus liste
+        auto i = std::find_if(children_.begin(), children_.end(),[&child](Node* node) {return (node->getName() == child);});
+            if (i != children_.end()) {
+                return *i;
+            } else {
+                return nullptr;
             }
     }
 
-    std::string Node::getName() {
-        return name;
+    std::string Node::getName() const {
+        return name_;
     }
 
-    std::string Node::getPath() {
-        return path;
+    std::string Node::getPath() const {
+        return path_;
     }
 
-    int Node::getDepth() {
-        return depth;
+    int Node::getDepth() const {
+        return depth_;
     }
 
-   glm::mat4 Node::getLocalTransform() {
-        return localTransform;
+   glm::mat4 Node::getLocalTransform() const {
+        return localTransform_;
     }
 
     void Node::setLocalTransform(glm::mat4 local) {
-        localTransform = local;
+        localTransform_ = local;
     }
 
-    glm::mat4 Node::getWorldTransform() {
-        return worldTransform;
+    glm::mat4 Node::getWorldTransform() const {
+        return worldTransform_;
     }
 
     void Node::setWorldTransform(glm::mat4 world) {
-        worldTransform = world;
+        worldTransform_ = world;
     }
 
     void Node::addChildren(Node* child) {
-        children.push_back(child);
+        children_.push_back(child);
     }
 
-    void Node::removeChildren(std::string child) { 
-        for(auto& i:children){
-            if(i->getName() == child) {
-                children.remove(i);
+    Node* Node::removeChildren(std::string child) { 
+        auto i = std::find_if(children_.begin(), children_.end(),[&child](Node* node) {return (node->getName() == child);});
+            if(i != children_.end()) {
+                children_.remove(*i);
+                return *i;
+            } else {
+                return nullptr;
             }
-        }
     }
 
-    /*
-    traversing through a tree:
-    start at root node
-    if list of children is != empty
-    get first child -> do stuff
-    get firstchilds chid do the same until list of children is empty;
-    get to parent look for second child
-    do this until there are no more children
-    */
+    std::list<Node*> Node::getListOfChildren() {
+        return children_;
+    }

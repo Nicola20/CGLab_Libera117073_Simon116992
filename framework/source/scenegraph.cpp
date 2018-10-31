@@ -1,19 +1,28 @@
 #include "scenegraph.hpp"
 
-std::string SceneGraph::getName() {
-    return name;
+SceneGraph::SceneGraph(): 
+    name_{},
+    root_{} {}
+
+SceneGraph::SceneGraph(std::string name, Node* root):
+    name_{name},
+    root_{root} {
+        std::cout<<"scenegrap created\n";
+    }
+
+std::string SceneGraph::getName() const {
+    return name_;
 }
 
-Node SceneGraph::getRoot() {
-    return root;
+Node* SceneGraph::getRoot() const {
+    return root_;
 }
 
-//std::string printGraph();
 
 void SceneGraph::setName(std::string name) {
-    name = name;
+    name_ = name;
 } 
 
-void SceneGraph::setRoot (Node root) {
-    root = root;
+void SceneGraph::setRoot (Node* root) {
+    root_ = root;
 }
