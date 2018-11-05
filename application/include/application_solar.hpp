@@ -30,6 +30,7 @@ class ApplicationSolar : public Application {
  protected:
   void initializeShaderPrograms();
   void initializeGeometry();
+  //initializes the SceneGraph with all the planets
   void initializeSceneGraph() const;
   // update uniform values
   void uploadUniforms();
@@ -38,8 +39,15 @@ class ApplicationSolar : public Application {
   // upload view matrix
   void uploadView();
 
+  void initializeStars();
+  void drawStars() const;
+
   // cpu representation of model
   model_object planet_object;
+  model_object star_object;
+
+  //container for stars
+  std::vector<float> stars_;
   
   // camera transform matrix
   glm::fmat4 m_view_transform;
