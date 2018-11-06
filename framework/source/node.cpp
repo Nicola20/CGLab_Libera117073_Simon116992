@@ -7,6 +7,12 @@
             std::cout<<"Node created \n";
         }
 
+    Node::Node(std::string name, float diameter, float rotation_speed, float distance):
+        name_{name},
+        diameter_{diameter},
+        rotation_speed_{rotation_speed},
+        distanceToOrigin_{distance} {}
+
     Node::Node(std::string name):
     name_{name} {}
 
@@ -72,3 +78,15 @@
     std::list<Node*> Node::getListOfChildren() {
         return children_;
     }
+
+float Node::getDiameter()const {
+    return diameter_;
+}
+
+float Node::getRotation() const {
+    return rotation_speed_;
+}
+
+float Node::getDistance() const {
+    return distanceToOrigin_;
+}

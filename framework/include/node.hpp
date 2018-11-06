@@ -12,6 +12,7 @@ class Node {
     public:
         Node(std::string name, Node* parent, glm::mat4 localtransform);
         Node(std::string name);
+        Node(std::string name, float diameter, float rotation_speed, float distance);
         Node* getParent() const;
         void setParent(Node* parent);
         Node* getChildren(std::string child) const;
@@ -24,7 +25,11 @@ class Node {
         void setWorldTransform(glm::mat4 local);
         void addChildren(Node* child);
         Node* removeChildren(std::string child);
-        std::list<Node*> getListOfChildren();
+        virtual std::list<Node*> getListOfChildren();
+
+        float getDiameter()const;
+        float getRotation() const;
+        float getDistance() const;
 
     private:
         Node* parent_;
@@ -34,6 +39,10 @@ class Node {
         int depth_;
         glm::mat4 localTransform_;
         glm::mat4 worldTransform_;
+
+        float diameter_;
+        float rotation_speed_;
+        float distanceToOrigin_;
 
 }; 
 #endif

@@ -7,10 +7,7 @@ GeometryNode::GeometryNode(std::string name, Node* parent, glm::mat4 localt, mod
     }
 
 GeometryNode::GeometryNode(std::string name, float diameter, float rotation_speed, float distance):
-    Node::Node(name),
-    diameter_{diameter},
-    rotation_speed_{rotation_speed},
-    distanceToOrigin_{distance}
+    Node::Node(name, diameter, rotation_speed, distance)
     //planet_{planet} 
     {}
 
@@ -21,7 +18,7 @@ model GeometryNode::getGeometry() const{
 void GeometryNode::setGeometry(model const& geo) {
     geometry_ = geo;
 }
-
+/*
 float GeometryNode::getDiameter()const {
     return diameter_;
 }
@@ -32,7 +29,8 @@ float GeometryNode::getRotation() const {
 
 float GeometryNode::getDistance() const {
     return distanceToOrigin_;
-}
+}*/
+
 /*
 planet GeometryNode::getPlanet() {
     return planet_;

@@ -10,16 +10,18 @@ class GeometryNode: public Node {
         model getGeometry() const;
         void setGeometry(model const& geo); 
         //planet getPlanet();
+        /*
         float getDiameter()const;
         float getRotation() const;
-        float getDistance() const;
+        float getDistance() const;*/
 
     private:
         model geometry_;
         //planet planet_;
         //used extra parameters for describing planets because a struct didn't work quite well for now
+        /*
         float diameter_;
         float rotation_speed_;
-        float distanceToOrigin_;
+        float distanceToOrigin_;*/
 
 };
