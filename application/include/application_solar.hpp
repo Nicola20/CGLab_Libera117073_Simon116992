@@ -25,13 +25,14 @@ class ApplicationSolar : public Application {
 
   // draw all objects
   void render() const;
-  void planetRendering(std::list<Node*> solarsystem) const;
+  void planetRendering(Node* i) const;
+  //void drawPlanets() const;
 
  protected:
   void initializeShaderPrograms();
   void initializeGeometry();
   //initializes the SceneGraph with all the planets
-  void initializeSceneGraph() const;
+  SceneGraph initializeSceneGraph() const;
   // update uniform values
   void uploadUniforms();
   // upload projection matrix
@@ -54,7 +55,7 @@ class ApplicationSolar : public Application {
   // camera projection matrix
   glm::fmat4 m_view_projection;
 
-  //SceneGraph solar_;
+  SceneGraph solar_;
 };
 
 #endif
