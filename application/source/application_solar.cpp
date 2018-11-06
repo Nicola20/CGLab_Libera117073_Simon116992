@@ -29,7 +29,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
 {
   initializeGeometry();
   initializeStars();
-  initializeSceneGraph();
+  //initializeSceneGraph();
   initializeShaderPrograms();
 }
 
@@ -37,10 +37,10 @@ ApplicationSolar::~ApplicationSolar() {
   glDeleteBuffers(1, &planet_object.vertex_BO);
   glDeleteBuffers(1, &planet_object.element_BO);
   glDeleteVertexArrays(1, &planet_object.vertex_AO);
-
+/*
   glDeleteBuffers(1, &star_object.vertex_BO);
   glDeleteBuffers(1, &star_object.element_BO);
-  glDeleteVertexArrays(1, &star_object.vertex_AO);
+  glDeleteVertexArrays(1, &star_object.vertex_AO);*/
 }
 
 void ApplicationSolar::initializeSceneGraph() const {
@@ -80,18 +80,20 @@ void ApplicationSolar::initializeSceneGraph() const {
 
   SceneGraph solarsystem {"solarsystem", sun};
   auto solar = solarsystem.getRoot()->getListOfChildren();
+  std::cout<<"came so far in scenegraph\n";
 
-  //planetRendering(solar);
+  planetRendering(solar);
 
 }
 
-/*
+
 void ApplicationSolar::render() const {
 
   initializeSceneGraph();
+  drawStars();
 
-}*/
-
+}
+/*
 void ApplicationSolar::render() const {
 
   //initializeSceneGraph();
@@ -116,22 +118,21 @@ void ApplicationSolar::render() const {
   glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
 
   //drawStars();
-}
+}*/
 
 //assignment 1 draw planets
-/*
+
 void ApplicationSolar::planetRendering(std::list<Node*> solarsystem) const {
 
     for (auto& i:solarsystem){
         auto nodechilds = i->getListOfChildren();
-        std::list<GeometryNode*> childs = nodechilds;
         //recursive traversal through graph
-        if(childs.size() > 0){   
-            planetRendering(childs);
+        if(nodechilds.size() > 0){   
+            planetRendering(nodechilds);
         }
 
         model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
-        i->setGeometry(planet_model);
+        //i->setGeometry(planet_model);
           // bind shader to upload uniforms
         glUseProgram(m_shaders.at("planet").handle);
 
@@ -152,7 +153,7 @@ void ApplicationSolar::planetRendering(std::list<Node*> solarsystem) const {
         // draw bound vertex array using bound shader
         glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
     }
-}*/
+}
 
 void ApplicationSolar::drawStars() const {
   std::cout<<"drawStars called\n";
@@ -257,8 +258,6 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.emplace("planet", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/simple.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/simple.frag"}}});
 
-   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
-                                           {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
   // request uniform locations for shader program
   m_shaders.at("planet").u_locs["NormalMatrix"] = -1;
   m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
@@ -269,13 +268,14 @@ void ApplicationSolar::initializeShaderPrograms() {
    // store shader program objects in container
   std::cout<<"greetings from initializeShader\n";
   
- /*m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
-                                           {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});*/
+ m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
+                                           {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
   std::cout<<"emplace-planet\n";
   // request uniform locations for shader program
   //m_shaders.at("star").u_locs["NormalMatrix"] = -1;
   //m_shaders.at("star").u_locs["ModelMatrix"] = -1;
   //not sure if this is needed
+  
   m_shaders.at("star").u_locs["ViewMatrix"] = -1;
   m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
   std::cout<<"hello there general kenobi\n";
@@ -357,9 +357,10 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 //handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
   // mouse handling; not perfected yet
+  /*
   m_view_transform = glm::rotate(m_view_transform, float(pos_x)/100, glm::fvec3{0.0f, -1.0f, 0.0f});
   m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, float(pos_y)/100, 0.0f});
-  uploadView();
+  uploadView();*/
 }
 
 //handle resizing
