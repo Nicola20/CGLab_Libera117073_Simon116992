@@ -90,3 +90,9 @@ float Node::getRotation() const {
 float Node::getDistance() const {
     return distanceToOrigin_;
 }
+
+Node* Node::getFirstChild(Node* i) const {
+    auto list = i->getListOfChildren();
+    auto it = list.begin();
+    return *it;
+}

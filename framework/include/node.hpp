@@ -27,6 +27,8 @@ class Node {
         Node* removeChildren(std::string child);
         virtual std::list<Node*> getListOfChildren();
 
+        Node* getFirstChild(Node* i) const;
+
         float getDiameter()const;
         float getRotation() const;
         float getDistance() const;
