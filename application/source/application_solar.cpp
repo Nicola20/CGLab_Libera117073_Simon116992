@@ -45,7 +45,7 @@ ApplicationSolar::~ApplicationSolar() {
 
 SceneGraph ApplicationSolar::initializeSceneGraph() const {
   //initializes solarsystemgraph
-  GeometryNode* sun = new GeometryNode{"sun", 1.0f, 0.0f,0.0f};  
+  GeometryNode* sun = new GeometryNode{"sun", 1.0f, 0.0f, 0.0f};  
   //model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
 /*
   planet sun{1.0f, 0.0f, 0.0f};
@@ -61,20 +61,28 @@ SceneGraph ApplicationSolar::initializeSceneGraph() const {
   GeometryNode* mercury = new GeometryNode{"mercury", 0.383f, 3.012f, 0.5f};
   sun->addChildren(mercury);
   //sun->setGeometry(planet_model);
+
   GeometryNode* venus = new GeometryNode{"venus",0.950f, 1.177f, 0.723f};
   sun->addChildren(venus);
+
   GeometryNode* earth = new GeometryNode{"earth", 1.0f, 1.0f, 1.0f};
   sun->addChildren(earth);
+
   GeometryNode* moon = new GeometryNode{"moon", 0.003f, 1.0f, 1.01f};
   earth->addChildren(moon);
+
   GeometryNode* mars = new GeometryNode{"mars", 0.583f, 0.53f, 1.524f};
   sun->addChildren(mars);
+
   GeometryNode* jupiter = new GeometryNode{"jupiter", 10.97f, 0.084f, 4.2f};
   sun->addChildren(jupiter);
+
   GeometryNode* saturn = new GeometryNode{"saturn", 9.14f, 0.0339f, 6.54f};
   sun->addChildren(saturn);
+
   GeometryNode* uranus = new GeometryNode{"uranus", 3.98f, 0.0119f, 8.19f};
   sun->addChildren(uranus);
+
   GeometryNode* neptune = new GeometryNode{"neptune",3.87f, 0.006f, 9.1f};
   sun->addChildren(neptune);
 
@@ -109,7 +117,10 @@ void ApplicationSolar::planetRendering(Node* i) const {
         glUseProgram(m_shaders.at("planet").handle);
 
         glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()*(i->getRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
-         model_matrix = glm::translate(model_matrix, glm::fvec3{0.0f+((*i).getDistance()), 0.0f, 1.0f});
+         //model_matrix = glm::translate(model_matrix, glm::fvec3{0.0f+((*i).getDistance()), 0.0f, 1.0f}); //o,o ,-1*distance
+         model_matrix = glm::translate (model_matrix, glm::vec3{0.0f, 0.0f, -1.0f*i->getDistance()});
+         glm::vec3 planetSize {i->getDiameter(), i->getDiameter(), i->getDiameter()};
+         //model_matrix = glm::scale(model_matrix, planetSize);
 
         glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                      1, GL_FALSE, glm::value_ptr(model_matrix));
