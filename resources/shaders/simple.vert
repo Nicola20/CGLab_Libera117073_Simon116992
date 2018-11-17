@@ -1,4 +1,5 @@
 #version 150
+
 #extension GL_ARB_explicit_attrib_location : require
 // vertex attributes of VAO
 layout(location = 0) in vec3 in_Position;
@@ -9,15 +10,19 @@ uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 uniform mat4 NormalMatrix;
-//is defined by glUniform3f
-uniform vec3 PlanetColor;
 
 out vec3 pass_Normal;
-out vec3 pass_Color; 
+out vec3 pass_VertPos;
+out vec3 pass_eyePos;
 
 void main(void)
 {
 	gl_Position = (ProjectionMatrix  * ViewMatrix * ModelMatrix) * vec4(in_Position, 1.0);
 	pass_Normal = (NormalMatrix * vec4(in_Normal, 0.0)).xyz;
-	pass_Color = PlanetColor;
+
+	//gives position of vertex back, since vec4[3]=1 you can just convert in vec3
+	pass_VertPos = vec3(ModelMatrix * vec4(in_Position, 1.0));
+
+	//computes the position of the viewer
+	pass_eyePos = (ModelMatrix * ViewMatrix * vec4(in_Position, 1.0)).xyz;
 }
