@@ -1,5 +1,7 @@
 #include "node.hpp"
 
+    Node::Node() {}
+
     Node::Node(std::string name, Node* parent, glm::mat4 localtransform):
         name_{name},
         parent_{parent},

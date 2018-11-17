@@ -10,6 +10,7 @@
 
 class Node {
     public:
+        Node();
         Node(std::string name, Node* parent, glm::mat4 localtransform);
         Node(std::string name);
         Node(std::string name, float diameter, float rotation_speed, float distance);
