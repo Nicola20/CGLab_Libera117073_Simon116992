@@ -31,6 +31,8 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeStars();
   solar_ = initializeSceneGraph();
   initializeShaderPrograms();
+  PointLightNode sunlight{10.0f, glm::vec3{1.0f, 1.0f, 1.0f}};
+  light_ = sunlight;
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -58,33 +60,36 @@ SceneGraph ApplicationSolar::initializeSceneGraph() const {
   planet Uranus(3.98f, 0.0119f, 8.19f);
   planet Neptun(3.87f, 0.006f, 9.1f);*/
 
-  GeometryNode* mercury = new GeometryNode{"mercury", 0.383f, 3.012f, 0.5f};
+  GeometryNode* mercury = new GeometryNode{"mercury", 0.383f, 3.012f, 1.5f};
   sun->addChildren(mercury);
   //sun->setGeometry(planet_model);
 
-  GeometryNode* venus = new GeometryNode{"venus",0.950f, 1.177f, 0.723f};
+  GeometryNode* venus = new GeometryNode{"venus",0.950f, 1.177f, 3.723f};
   sun->addChildren(venus);
 
-  GeometryNode* earth = new GeometryNode{"earth", 1.0f, 1.0f, 1.0f};
+  GeometryNode* earth = new GeometryNode{"earth", 1.0f, 1.0f, 5.0f};
   sun->addChildren(earth);
 
-  GeometryNode* moon = new GeometryNode{"moon", 0.003f, 1.0f, 1.01f};
+  GeometryNode* moon = new GeometryNode{"moon", 0.003f, 1.0f, 7.01f};
   earth->addChildren(moon);
 
-  GeometryNode* mars = new GeometryNode{"mars", 0.583f, 0.53f, 1.524f};
+  GeometryNode* mars = new GeometryNode{"mars", 0.583f, 0.53f, 9.524f};
   sun->addChildren(mars);
 
-  GeometryNode* jupiter = new GeometryNode{"jupiter", 10.97f, 0.084f, 4.2f};
+  GeometryNode* jupiter = new GeometryNode{"jupiter", 10.97f, 0.084f, 11.2f};
   sun->addChildren(jupiter);
 
-  GeometryNode* saturn = new GeometryNode{"saturn", 9.14f, 0.0339f, 6.54f};
+  GeometryNode* saturn = new GeometryNode{"saturn", 9.14f, 0.0339f, 13.54f};
   sun->addChildren(saturn);
 
-  GeometryNode* uranus = new GeometryNode{"uranus", 3.98f, 0.0119f, 8.19f};
+  GeometryNode* uranus = new GeometryNode{"uranus", 3.98f, 0.0119f, 15.19f};
   sun->addChildren(uranus);
 
-  GeometryNode* neptune = new GeometryNode{"neptune",3.87f, 0.006f, 9.1f};
+  GeometryNode* neptune = new GeometryNode{"neptune",3.87f, 0.006f, 17.1f};
   sun->addChildren(neptune);
+
+  //PointLightNode sunlight{10.0f, glm::vec3{1.0f, 1.0f, 1.0f}};
+  //light_ = PointLightNode sunlight{10.0f, glm::vec3{1.0f, 1.0f, 1.0f}};
 
   SceneGraph solarsystem {"solarsystem", sun};
   return solarsystem;
@@ -104,7 +109,8 @@ void ApplicationSolar::render() const {
   for(auto i : solar_.getRoot()->getListOfChildren()) {
       planetRendering(i);
   }
-  //drawPlanets();
+
+  //draws srars
   drawStars();
 
 }
@@ -122,8 +128,13 @@ void ApplicationSolar::planetRendering(Node* i) const {
          glm::vec3 planetSize {i->getDiameter(), i->getDiameter(), i->getDiameter()};
          //model_matrix = glm::scale(model_matrix, planetSize);
 
-        //gives planet specific color - first parameter is location in vertex shader second to forth are the color values
+        //gives planet specific color - first parameter is location in fragment shader second to forth are the color values
         glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), 1.0f, 0.0f, 0.0f);
+        glm::vec3 pointlightcol = light_.getColor();
+        glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), pointlightcol.x, pointlightcol.y, pointlightcol.z);
+
+        glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light_.getLightIntensity());
+
         glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                      1, GL_FALSE, glm::value_ptr(model_matrix));
 
@@ -157,6 +168,9 @@ void ApplicationSolar::drawStars() const {
 //assignment 2
 void ApplicationSolar::initializeStars(){
     std::cout<<"initialize Stars\n";
+
+    //initialize with rgb rand and pos rand seperatly
+    //fill star verctor with random numbers
     for(int i=0; i< 1000*6;++i){
       float j = (float)((rand()%300)-250);
       stars_.push_back(j);
@@ -175,11 +189,11 @@ void ApplicationSolar::initializeStars(){
       // activate first attribute on gpu
   glEnableVertexAttribArray(0);
   // first attribute is 3 floats with stride of 6 floats(floats till next attribute)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float),(void*)0); //could also be 3*sizeof float
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float),(void*)0); //could also be 3*sizeof float
   // activate second attribute on gpu
   glEnableVertexAttribArray(1);
   // second attribute is 3 floats; same as above 
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)3); //(sizeof(float)*3)
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)3); //(sizeof(float)*3)
   std::cout<<"initialize Stars-vertex\n";
 
   // generate generic buffer
@@ -248,7 +262,11 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
   m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
   m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
+
+  //request uniform location for shader which is the color of the planet
   m_shaders.at("planet").u_locs["PlanetColor"] = -1;
+  m_shaders.at("planet").u_locs["LightColor"] = -1;
+  m_shaders.at("planet").u_locs["LightIntensity"] = -1;
 
   //shader for stars
    // store shader program objects in container

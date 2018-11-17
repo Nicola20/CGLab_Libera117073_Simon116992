@@ -7,6 +7,7 @@
 #include "scenegraph.hpp"
 #include "geometrynode.hpp"
 #include "cameranode.hpp"
+#include "pointLightNode.hpp"
 
 // gpu representation of model
 class ApplicationSolar : public Application {
@@ -49,6 +50,8 @@ class ApplicationSolar : public Application {
 
   //container for stars
   std::vector<float> stars_;
+
+  PointLightNode light_;
   
   // camera transform matrix
   glm::fmat4 m_view_transform;
