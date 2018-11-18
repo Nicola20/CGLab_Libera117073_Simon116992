@@ -1,21 +1,21 @@
 #include "geometrynode.hpp"
-
-GeometryNode::GeometryNode(std::string name, Node* parent, glm::mat4 localt, model geo):
-    Node::Node(name, parent,localt),
+/*
+GeometryNode::GeometryNode(std::string name, glm::mat4 localt, model_object geo):
+    Node::Node(name, localt),
     geometry_{geo} {
         std::cout<<"created GeometryNode\n";
-    }
+    }*/
 
-GeometryNode::GeometryNode(std::string name, float diameter, float rotation_speed, float distance):
-    Node::Node(name, diameter, rotation_speed, distance)
+GeometryNode::GeometryNode(std::string name, int depth, float diameter, float rotation_speed, float distance, float selfRotation):
+    Node::Node(name, depth, diameter, rotation_speed, distance, selfRotation)  {}
     //planet_{planet} 
-    {}
+ 
 
-model GeometryNode::getGeometry() const{
+model_object GeometryNode::getGeometry() const{
     return geometry_;
 }
 
-void GeometryNode::setGeometry(model const& geo) {
+void GeometryNode::setGeometry(model_object const& geo) {
     geometry_ = geo;
 }
 /*

@@ -2,32 +2,38 @@
 
     Node::Node() {}
 
-    Node::Node(std::string name, Node* parent, glm::mat4 localtransform):
+    Node::Node(std::string name, std::shared_ptr<Node> parent, glm::mat4 localtransform):
         name_{name},
         parent_{parent},
         localTransform_{localtransform}{
             std::cout<<"Node created \n";
         }
 
-    Node::Node(std::string name, float diameter, float rotation_speed, float distance):
+    Node::Node(std::string name, int depth, float diameter, float rotation_speed, float distance, float selfRotation):
         name_{name},
+        depth_{depth},
         diameter_{diameter},
         rotation_speed_{rotation_speed},
-        distanceToOrigin_{distance} {}
+        distanceToOrigin_{distance},
+        selfRotation_{selfRotation} {}
 
     Node::Node(std::string name):
     name_{name} {}
 
-    Node* Node::getParent() const {
+    Node::Node (std::string name, int depth):
+        name_{name},
+        depth_{depth} {}
+
+    std::shared_ptr<Node> Node::getParent() const {
         return parent_;
     }
 
-    void Node::setParent(Node* parent) { //I'm not sure about this either I'm using same pointer or same value of pointert
+    void Node::setParent(std::shared_ptr<Node> parent) { //I'm not sure about this either I'm using same pointer or same value of pointert
         parent_ = parent;
     }
 
-    Node* Node::getChildren(std::string child) const { //spezielles child aus liste
-        auto i = std::find_if(children_.begin(), children_.end(),[&child](Node* node) {return (node->getName() == child);});
+    std::shared_ptr<Node> Node::getChildren(std::string child) const { //spezielles child aus liste
+        auto i = std::find_if(children_.begin(), children_.end(),[&child](std::shared_ptr<Node> node) {return (node->getName() == child);});
             if (i != children_.end()) {
                 return *i;
             } else {
@@ -63,12 +69,12 @@
         worldTransform_ = world;
     }
 
-    void Node::addChildren(Node* child) {
+    void Node::addChildren(std::shared_ptr<Node> child) {
         children_.push_back(child);
     }
 
-    Node* Node::removeChildren(std::string child) { 
-        auto i = std::find_if(children_.begin(), children_.end(),[&child](Node* node) {return (node->getName() == child);});
+    std::shared_ptr<Node> Node::removeChildren(std::string child) { 
+        auto i = std::find_if(children_.begin(), children_.end(),[&child](std::shared_ptr<Node> node) {return (node->getName() == child);});
             if(i != children_.end()) {
                 children_.remove(*i);
                 return *i;
@@ -77,7 +83,7 @@
             }
     }
 
-    std::list<Node*> Node::getListOfChildren() {
+    std::list<std::shared_ptr<Node>> Node::getListOfChildren() {
         return children_;
     }
 
@@ -93,8 +99,20 @@ float Node::getDistance() const {
     return distanceToOrigin_;
 }
 
-Node* Node::getFirstChild(Node* i) const {
+glm::vec3 Node::getPlanetColor() const {
+    return planetCol_;
+}
+
+float Node::getSelfRotation() const {
+    return selfRotation_;
+}
+
+void Node::setPlanetColor(glm::vec3 const& col) {
+    planetCol_ = col;
+}
+/*
+std::shared_ptr<Node> Node::getFirstChild(std::shared_ptr<Node> i) const {
     auto list = i->getListOfChildren();
     auto it = list.begin();
     return *it;
-}
+}*/
