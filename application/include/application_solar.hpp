@@ -26,7 +26,7 @@ class ApplicationSolar : public Application {
 
   // draw all objects
   void render() const;
-  void planetRendering(Node* i) const;
+  void planetRendering() const;
   //void drawPlanets() const;
 
  protected:
