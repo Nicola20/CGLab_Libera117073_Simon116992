@@ -82,7 +82,7 @@ SceneGraph ApplicationSolar::initializeSceneGraph() const {
 
   GeometryNode saturn{"saturn", 1, 9.14f, 0.0339f, 13.54f, 1.0};
   saturn.setLocalTransform(local);
-  earth.setPlanetColor(glm::vec3{0.9, 0.8, 0.5});
+  saturn.setPlanetColor(glm::vec3{0.9, 0.8, 0.5});
 
   GeometryNode uranus{"uranus", 1, 3.98f, 0.0119f, 15.19f, 1.0};
   uranus.setLocalTransform(local);
@@ -141,7 +141,7 @@ void ApplicationSolar::planetRendering() const {
 
         //no transformations since sun isn't moving or rotating
         if (i->getName() == "sun") {
-          glm::fmat4 model_sun = i->getLocalTransform();
+          glm::fmat4 model_matrix = i->getLocalTransform();
 
           glm::vec3 planetcol = i->getPlanetColor();
           glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), planetcol.x, planetcol.y, planetcol.z);
@@ -151,10 +151,10 @@ void ApplicationSolar::planetRendering() const {
           glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), pointlightcol.x, pointlightcol.y, pointlightcol.z);
           glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light_.getLightIntensity()); 
           glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-                     1, GL_FALSE, glm::value_ptr(model_sun));
+                     1, GL_FALSE, glm::value_ptr(model_matrix));
 
         // extra matrix for normal transformation to keep them orthogonal to surface
-        glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_sun);
+        glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
         glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
                      1, GL_FALSE, glm::value_ptr(normal_matrix));
 
@@ -201,34 +201,32 @@ void ApplicationSolar::planetRendering() const {
           if(!(i->getListOfChildren().empty())) {
             for (auto& moon: i->getListOfChildren()) {
 
-                  glm::mat4 moon_matrix = moon->getParent()->getLocalTransform();
+                  glm::fmat4 moon_matrix = glm::rotate(moon->getParent()->getLocalTransform(), float(glfwGetTime())*(moon->getParent()->getRotation()), glm::fvec3{0.0f, 1.0f, 0.0f});
+                  moon_matrix = glm::translate (moon_matrix, glm::vec3{0.0f, 0.0f, -1.0f*moon->getParent()->getDistance()});
 
-                  glm::fmat4 model_matrix = glm::rotate(moon_matrix, float(glfwGetTime()*(moon->getParent()->getRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
-                  model_matrix = glm::translate (model_matrix, glm::vec3{0.0f, 0.0f, -1.0f*moon->getParent()->getDistance()});
-
-                  model_matrix = glm::rotate(moon_matrix, float(glfwGetTime()*(moon->getRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
-                  model_matrix = glm::translate (model_matrix, glm::vec3{0.0f, 0.0f, -1.0f*moon->getDistance()});
-                  model_matrix = glm::rotate(model_matrix, float(glfwGetTime()*(moon->getSelfRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
+                  moon_matrix = glm::rotate(moon_matrix, float(glfwGetTime()*(moon->getRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
+                  moon_matrix = glm::translate (moon_matrix, glm::vec3{0.0f, 0.0f, -1.0f*moon->getDistance()});
+                  //model_matrix = glm::rotate(model_matrix, float(glfwGetTime()*(moon->getSelfRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
 
                   //scale the planet according to their diameter
                   glm::vec3 planetSize {moon->getDiameter(), moon->getDiameter(), moon->getDiameter()};
                   //model_matrix = glm::scale(model_matrix, planetSize);
 
                   //gives planet specific color - first parameter is location in fragment shader second to forth are the color values
-                  glm::vec3 planetcol = moon->getPlanetColor();
-                    glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), planetcol.x, planetcol.y, planetcol.z);
+                  glm::vec3 mooncol = moon->getPlanetColor();
+                    glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mooncol.x, mooncol.y, mooncol.z);
 
                   /* set lighting for planet */
-                 glm::vec3 pointlightcol = light_.getColor();
-                  glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), pointlightcol.x, pointlightcol.y, pointlightcol.z);
+                 glm::vec3 moonpointlightcol = light_.getColor();
+                  glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), moonpointlightcol.x, moonpointlightcol.y, moonpointlightcol.z);
                   glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light_.getLightIntensity());
                   
 
                   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-                              1, GL_FALSE, glm::value_ptr(model_matrix));
+                              1, GL_FALSE, glm::value_ptr(moon_matrix));
 
                   // extra matrix for normal transformation to keep them orthogonal to surface
-                  glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+                  glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * moon_matrix);
                   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
                               1, GL_FALSE, glm::value_ptr(normal_matrix));
 
