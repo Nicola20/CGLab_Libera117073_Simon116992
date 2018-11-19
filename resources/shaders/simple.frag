@@ -14,12 +14,12 @@ uniform vec3 LightColor;
 out vec4 out_Color;
 
 vec3 diffuse = PlanetColor;
-const vec3 ambient = vec3(0.1,0.0,0.0);
+const vec3 ambient = vec3(0.1, 0.0 ,0.0);
 const vec3 specularColor = vec3(1.0, 1.0, 1.0);
 vec3 lightPos = vec3(0.0, 0.0, 0.0);
 
-float M_pi = 3.14159;
-const float reflect = 1.5;
+const float M_pi = 3.1415926535897932384626433832795;
+const float reflect = 2.5;
 const float shineness = 4.0;
 
 
@@ -33,7 +33,7 @@ void main() {
 
     vec3 phi = LightColor*LightIntensity;
     float distance = length(lightDir);
-    vec3 beta = phi/(distance*distance);
+    vec3 beta = phi/(4*M_pi*(distance*distance));
     float lambertian = max(dot(lightDir,normal), 0.0);
     float reflectivity = reflect/M_pi;
 
