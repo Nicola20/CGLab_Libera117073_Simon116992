@@ -32,7 +32,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   solar_ = initializeSceneGraph();
   initializeShaderPrograms();
   
-  PointLightNode sunlight{10.0f, glm::vec3{1.0f, 1.0f, 1.0f}};
+  PointLightNode sunlight{10.0f, glm::vec3{0.4, 0.5, 0.5}};
   light_ = sunlight;
 }
 
@@ -58,7 +58,7 @@ SceneGraph ApplicationSolar::initializeSceneGraph() const {
 
   GeometryNode mercury {"mercury", 1, 0.383f, 3.012f, 2.0f, 1.0f};
   mercury.setLocalTransform(local);
-  mercury.setPlanetColor(glm::vec3{0.4, 0.5, 0.5});
+  mercury.setPlanetColor(glm::vec3{0.4, 0.5, 0.5}); 
 
   GeometryNode venus{"venus",1, 0.950f, 1.177f, 3.723f, 1.0f};
   venus.setLocalTransform(local);
@@ -88,7 +88,7 @@ SceneGraph ApplicationSolar::initializeSceneGraph() const {
   uranus.setLocalTransform(local);
   uranus.setPlanetColor(glm::vec3{0.7, 0.8, 1.0});
 
-  GeometryNode neptune{"neptune",1, 3.87f, 0.006f, 17.1f, 1.0};
+  GeometryNode neptune{"neptune",1, 3.87f, 0.6f, 17.1f, 1.0};
   neptune.setLocalTransform(local);
   neptune.setPlanetColor(glm::vec3{0.0, 0.2, 1.0});
 
@@ -198,7 +198,7 @@ void ApplicationSolar::planetRendering() const {
         // draw bound vertex array using bound shader
         glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
 
-          if(i->getListOfChildren().size() > 0) {
+          if(!(i->getListOfChildren().empty())) {
             for (auto& moon: i->getListOfChildren()) {
 
                   glm::mat4 moon_matrix = moon->getParent()->getLocalTransform();
