@@ -13,7 +13,7 @@ uniform mat4 NormalMatrix;
 
 out vec3 pass_Normal;
 out vec3 pass_VertPos;
-//out vec3 pass_eyePos;
+out vec3 pass_eyePos;
 
 void main(void)
 {
@@ -22,10 +22,10 @@ void main(void)
 
 	/*
 	//gives position of vertex back, since vec4[3]=1 you can just convert in vec3
-	pass_VertPos = vec3(ModelMatrix * vec4(in_Position, 1.0));
+	pass_VertPos = vec3(ModelMatrix * vec4(in_Position, 1.0)); */
 
 	//computes the position of the viewer
-	pass_eyePos = (ModelMatrix * ViewMatrix * vec4(in_Position, 1.0)).xyz; */
+	pass_eyePos = (ModelMatrix * ViewMatrix * vec4(in_Position, 1.0)).xyz; 
 
 	vec4 vertPos4 = ModelMatrix * vec4(in_Position, 1.0);
 	pass_VertPos = vec3 (vertPos4/vertPos4.w);
