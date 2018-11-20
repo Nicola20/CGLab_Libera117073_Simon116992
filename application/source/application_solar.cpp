@@ -146,6 +146,9 @@ void ApplicationSolar::planetRendering() const {
           //sending planetcolor at the shader since uniform is only accepting floats we have to split the color vec3
           glm::vec3 planetcol = i->getPlanetColor();
           glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), planetcol.x, planetcol.y, planetcol.z);
+
+          //ShaderMode
+          glUniform1i(m_shaders.at("planet").u_locs.at("ShaderMode"), shader_Mode);
             /*
            //sending lightsettings at the shader
           glm::vec3 pointlightcol = light_.getColor();
@@ -190,6 +193,9 @@ void ApplicationSolar::planetRendering() const {
          glm::vec3 planetcol = i->getPlanetColor();
           glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), planetcol.x, planetcol.y, planetcol.z);
 
+        //Shader Mode
+         glUniform1i(m_shaders.at("planet").u_locs.at("ShaderMode"), shader_Mode);
+
         /* set lighting for planet */
         glm::vec3 pointlightcol = light_.getColor();
         glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), pointlightcol.x, pointlightcol.y, pointlightcol.z);
@@ -221,6 +227,9 @@ void ApplicationSolar::planetRendering() const {
                   //gives planet specific color - first parameter is location in fragment shader second to forth are the color values
                   glm::vec3 mooncol = moon->getPlanetColor();
                     glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mooncol.x, mooncol.y, mooncol.z);
+                  
+                  //ShaderMode
+                  glUniform1i(m_shaders.at("planet").u_locs.at("ShaderMode"), shader_Mode);
 
                   /* set lighting for planet */
                  glm::vec3 moonpointlightcol = light_.getColor();
@@ -316,6 +325,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
   m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
   m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
+  m_shaders.at("planet").u_locs["ShaderMode"] = -1;
 
   //request uniform location for shader which is the color of the planet
   m_shaders.at("planet").u_locs["PlanetColor"] = -1;
@@ -333,7 +343,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   //you dont't need a normal or modelmatrix since they are only drawn as points 
   m_shaders.at("star").u_locs["ViewMatrix"] = -1;
   m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
-  std::cout<<"hello there general kenobi\n";
+  
 }
 
 // load models -> is know more like initializePlanets
@@ -341,7 +351,7 @@ void ApplicationSolar::initializeGeometry() {
   model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
 
   // generate vertex array object
-  glGenVertexArrays(1, &planet_object.vertex_AO);
+  glGenVertexArrays(1, &planet_object.vertex_AO);std::cout<<"hello there general kenobi\n";
   // bind the array for attaching buffers
   glBindVertexArray(planet_object.vertex_AO);
 
@@ -448,6 +458,22 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, -0.1f, 0.1f});
     uploadView();
   }
+  //ShaderMode = 1
+  else if (key == GLFW_KEY_1) {
+    shader_Mode = 1;
+    std::cout<<"ShaderMode = 1\n";
+  }
+  //ShaderMode = 2
+  else if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+    if(shader_Mode == 2) {
+      shader_Mode = 1;
+      std::cout<<"ShaderMode = 1\n";
+    } else {
+      shader_Mode = 2;
+      std::cout<<"ShaderMode = 2\n";
+    }
+}
+
 }
 
 //handle delta mouse movement input

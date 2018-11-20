@@ -10,10 +10,12 @@ uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 uniform mat4 NormalMatrix;
+uniform int ShaderMode;
 
 out vec3 pass_Normal;
 out vec3 pass_VertPos;
 out vec3 pass_eyePos;
+flat out int shader_Mode;
 
 void main(void)
 {
@@ -29,4 +31,6 @@ void main(void)
 
 	vec4 vertPos4 = ModelMatrix * vec4(in_Position, 1.0);
 	pass_VertPos = vec3 (vertPos4/vertPos4.w);
+
+	shader_Mode = ShaderMode;
 }

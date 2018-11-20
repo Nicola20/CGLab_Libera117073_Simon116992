@@ -52,6 +52,9 @@ class ApplicationSolar : public Application {
   std::vector<float> stars_;
 
   PointLightNode light_;
+
+  //ShaderMode
+  int shader_Mode = 1;
   
   // camera transform matrix
   glm::fmat4 m_view_transform;
