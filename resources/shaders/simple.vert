@@ -10,27 +10,23 @@ uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 uniform mat4 NormalMatrix;
-uniform int ShaderMode;
+//uniform int ShaderMode;
 
 out vec3 pass_Normal;
 out vec3 pass_VertPos;
 out vec3 pass_eyePos;
-flat out int shader_Mode;
+//flat out int shader_Mode;
 
 void main(void)
 {
 	gl_Position = (ProjectionMatrix  * ViewMatrix * ModelMatrix) * vec4(in_Position, 1.0);
 	pass_Normal = (NormalMatrix * vec4(in_Normal, 0.0)).xyz;
 
-	/*
-	//gives position of vertex back, since vec4[3]=1 you can just convert in vec3
-	pass_VertPos = vec3(ModelMatrix * vec4(in_Position, 1.0)); */
+	//computes the position of the viewer - going from camera coordinates to model
+	pass_eyePos = vec3(ViewMatrix*ModelMatrix*NormalMatrix*vec4(in_Position, 1.0)).xyz; 
 
-	//computes the position of the viewer
-	pass_eyePos = (ModelMatrix * ViewMatrix * vec4(in_Position, 1.0)).xyz; 
-
-	vec4 vertPos4 = ModelMatrix * vec4(in_Position, 1.0);
+	vec4 vertPos4 = ModelMatrix* vec4(in_Position, 1.0);
 	pass_VertPos = vec3 (vertPos4/vertPos4.w);
 
-	shader_Mode = ShaderMode;
+	//shader_Mode = ShaderMode;
 }
