@@ -25,6 +25,7 @@ void main(void)
 	//computes the position of the viewer - going from camera coordinates to model
 	pass_eyePos = vec3(ViewMatrix*ModelMatrix*NormalMatrix*vec4(in_Position, 1.0)).xyz; 
 
+	//computes position of the vertice
 	vec4 vertPos4 = ModelMatrix* vec4(in_Position, 1.0);
 	pass_VertPos = vec3 (vertPos4/vertPos4.w);
 

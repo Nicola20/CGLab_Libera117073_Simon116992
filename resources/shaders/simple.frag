@@ -46,7 +46,7 @@ void main() {
 
      // if(lambertian > 0.0) {
         vec3 viewDir = normalize(-pass_VertPos); // view direction
-        vec3 halfway = normalize(lightDir + viewDir); / halfway vector
+        vec3 halfway = normalize(lightDir + viewDir); // halfway vector
         float specAngle = max(dot(halfway, normal),0.0); // rho
         spec = pow(specAngle, 4*shineness); // calculate specular reflection if the surface is oriented to the light source
      // }
