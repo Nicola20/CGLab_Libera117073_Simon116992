@@ -53,8 +53,8 @@ class ApplicationSolar : public Application {
 
   PointLightNode light_;
 
-  //ShaderMode
-  int shader_Mode = 1;
+  //ShaderMode for switching between blinn phong and cell-shading
+  int shader_Mode;
   
   // camera transform matrix
   glm::fmat4 m_view_transform;

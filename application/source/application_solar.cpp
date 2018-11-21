@@ -24,14 +24,18 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,planet_object{}
  //,star_object{}
  //,stars_{}
+ ,shader_Mode{1} //default mode is 1 or blinn phong
  ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
 {
   initializeGeometry();
+
+  //initialize star geometry
   initializeStars();
+  //set scenefraph with planets
   solar_ = initializeSceneGraph();
   initializeShaderPrograms();
-  
+  //set pointlight for the scene
   PointLightNode sunlight{40.0f, glm::vec3{0.4, 0.5, 0.5}};
   light_ = sunlight;
 }
@@ -46,6 +50,7 @@ ApplicationSolar::~ApplicationSolar() {
   glDeleteVertexArrays(1, &star_object.vertex_AO);
 }
 
+/*--------------------------initializes scenegraph with all the components to compute with ---------------------------------------*/
 SceneGraph ApplicationSolar::initializeSceneGraph() const {
 
   //initializes solarsystemgraph
@@ -114,15 +119,9 @@ SceneGraph ApplicationSolar::initializeSceneGraph() const {
   return solarsystem;
 }
 
-
+//main method with is doing all the drawing
 void ApplicationSolar::render() const {
-
-  //for now its just traversing through a list not the actual tree
-/*
-  for(auto i : solar_.getRoot()->getListOfChildren()) {
-      planetRendering(i);
-  }*/
-
+  //draws planets
   planetRendering();
 
   //draws srars
@@ -132,16 +131,20 @@ void ApplicationSolar::render() const {
 
 //assignment 1 draw planets
 void ApplicationSolar::planetRendering() const {
-
+    //set model for planets
     model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
     // bind shader to upload uniforms
    glUseProgram(m_shaders.at("planet").handle);
 
+  //go through all the children of the rootnode
   for (auto& i: solar_.getRoot()->getListOfChildren()) {
 
+        //we have to handle the sun a bit different since its not moving
         if (i->getName() == "sun") {
           glm::fmat4 model_matrix = i->getLocalTransform();
-          //no transformations since sun isn't moving or rotating
+          //we have to do the translation first and then the rotation otherwise sun would be moving
+          model_matrix = glm::translate (model_matrix, glm::vec3{0.0f, 0.0f, -1.0f*i->getDistance()});
+          model_matrix = glm::rotate(model_matrix, float(glfwGetTime()*(i->getSelfRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
           
           //sending planetcolor at the shader since uniform is only accepting floats we have to split the color vec3
           glm::vec3 planetcol = i->getPlanetColor();
@@ -149,12 +152,6 @@ void ApplicationSolar::planetRendering() const {
 
           //ShaderMode
           glUniform1i(m_shaders.at("planet").u_locs.at("ShaderMode"), shader_Mode);
-            /*
-           //sending lightsettings at the shader
-          glm::vec3 pointlightcol = light_.getColor();
-          glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), pointlightcol.x, pointlightcol.y, pointlightcol.z);
-          glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light_.getLightIntensity());*/
-
 
           glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                      1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -170,11 +167,14 @@ void ApplicationSolar::planetRendering() const {
         // draw bound vertex array using bound shader
         glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
 
-        } else if(i->getDepth() == 1)  {
+        } else  {
 
-        //glm::fmat4 model_matrix = glm::fmat4{};
-        glm::fmat4 model_matrix = glm::rotate(i->getLocalTransform(), float(glfwGetTime()*(i->getRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
+        glm::fmat4 model_matrix = glm::fmat4{};
+        model_matrix = glm::rotate(model_matrix, float(glfwGetTime()*(i->getRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
          model_matrix = glm::translate (model_matrix, glm::vec3{0.0f, 0.0f, -1.0f*i->getDistance()});
+
+         i->setLocalTransform(model_matrix);
+
         model_matrix = glm::rotate(model_matrix, float(glfwGetTime()*(i->getSelfRotation())), glm::fvec3{0.0f, 1.0f, 0.0f});
 
          //scale the planet according to their diameter
@@ -459,7 +459,7 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     uploadView();
   }
   //ShaderMode = 1
-  else if (key == GLFW_KEY_1) {
+  else if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
     shader_Mode = 1;
     std::cout<<"ShaderMode = 1\n";
   }
