@@ -29,6 +29,8 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
 {
   initializeGeometry();
+  loadTextures();
+  initializeTextures();
 
   //initialize star geometry
   initializeStars();
@@ -270,6 +272,71 @@ void ApplicationSolar::drawStars() const {
 
 }
 
+void ApplicationSolar::loadTextures() {
+  /*
+  texture sun {"sun", texture_loader::file(m_resource_path + "textures/sunmap.png")};
+  texture mercury {"mercury", texture_loader::file(m_resource_path + "textures/mercurymap.png")};
+  texture venus {"venus", texture_loader::file(m_resource_path + "textures/venusmap.png")};
+  texture earth {"earth", texture_loader::file(m_resource_path + "textures/earthmap1k.png")};
+  texture moon {"moon", texture_loader::file(m_resource_path + "textures/moonmap1k.png")};
+  texture mars {"mars", texture_loader::file(m_resource_path + "textures/marsmap1k.png")};
+  texture jupiter {"jupiter", texture_loader::file(m_resource_path + "textures/jupitermap.png")};
+  texture saturn {"saturn", texture_loader::file(m_resource_path + "textures/saturnmap.png")};
+  texture uranus {"uranus", texture_loader::file(m_resource_path + "textures/uranusmap.png")};
+  texture neptune {"neptune", texture_loader::file(m_resource_path + "textures/neptunemap.png")};*/
+
+  pixel_data sun = texture_loader::file(m_resource_path + "textures/sunmap.png");
+  pixel_data mercury = texture_loader::file(m_resource_path + "textures/mercurymap.png");
+  pixel_data venus = texture_loader::file(m_resource_path + "textures/venusmap.png");
+  pixel_data earth = texture_loader::file(m_resource_path + "textures/earthmap1k.png");
+  pixel_data moon = texture_loader::file(m_resource_path + "textures/moonmap1k.png");
+  pixel_data mars = texture_loader::file(m_resource_path + "textures/marsmap1k.png");
+  pixel_data jupiter = texture_loader::file(m_resource_path + "textures/jupitermap.png");
+  pixel_data saturn = texture_loader::file(m_resource_path + "textures/saturnmap.png");
+  pixel_data uranus = texture_loader::file(m_resource_path + "textures/uranusmap.png");
+  pixel_data neptune = texture_loader::file(m_resource_path + "textures/neptunemap.png");
+
+
+  texContainer_.push_back(sun);
+  texContainer_.push_back(mercury);
+  texContainer_.push_back(venus);
+  texContainer_.push_back(earth);
+  texContainer_.push_back(moon);
+  texContainer_.push_back(mars);
+  texContainer_.push_back(jupiter);
+  texContainer_.push_back(saturn);
+  texContainer_.push_back(uranus);
+  texContainer_.push_back(neptune);
+}
+
+void ApplicationSolar::initializeTextures() {
+  //initialize every texture in the texture conatainer
+  for (int i = 0; i<texContainer_.size(); ++i){
+    //make a texture object to handle 
+    texture_object texture;
+
+    /*initialize texture*/
+    //specifies which texture unit to make active - default initialisation
+    glActiveTexture(GL_TEXTURE0);
+    //specifies num of textures to be generated and which
+    glGenTextures(1, &texture.handle);
+    //binds texture to target - in this case 2D because we use an image as texture
+    glBindTexture(GL_TEXTURE_2D, texture.handle);
+
+    /*define texture sampling parameters*/
+    //texture filtering set to linear
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    /*define texture data and format*/
+    glTexImage2D(GL_TEXTURE_2D, 0, texContainer_[i].channels, texContainer_[i].width, texContainer_[i].height,
+                0,texContainer_[i].channels,texContainer_[i].channel_type, &texContainer_[i]);
+
+    texObj_.push_back(texture);
+  }
+  
+}
+
 
 //is called each time the camera changes position
 void ApplicationSolar::uploadView() {
@@ -332,6 +399,8 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["LightColor"] = -1;
   m_shaders.at("planet").u_locs["LightIntensity"] = -1;
 
+  m_shaders.at("planet").u_locs["Texture"] = -1;
+
   //shader for stars
    // store shader program objects in container
   std::cout<<"greetings from initializeShader\n";
@@ -393,7 +462,7 @@ void ApplicationSolar::initializeStars(){
 
     //initialize with rgb rand and pos rand seperatly
     //fill star verctor with random numbers
-    for(int i=0; i< 1000*6;++i){
+    for(int i=0; i< 3000*6;++i){
       float j = (float)((rand()%300)-250);
       stars_.push_back(j);
     }

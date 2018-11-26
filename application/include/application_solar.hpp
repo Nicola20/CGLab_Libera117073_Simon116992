@@ -8,6 +8,7 @@
 #include "geometrynode.hpp"
 #include "cameranode.hpp"
 #include "pointLightNode.hpp"
+#include "texture_loader.hpp"
 
 // gpu representation of model
 class ApplicationSolar : public Application {
@@ -26,14 +27,20 @@ class ApplicationSolar : public Application {
 
   // draw all objects
   void render() const;
+
+  //draw planets
   void planetRendering() const;
-  //void drawPlanets() const;
+
+  //load textures into container 
+  void loadTextures();
 
  protected:
   void initializeShaderPrograms();
   void initializeGeometry();
   //initializes the SceneGraph with all the planets
   SceneGraph initializeSceneGraph() const;
+  //initialize textures for further use
+  void initializeTextures();
   // update uniform values
   void uploadUniforms();
   // upload projection matrix
@@ -50,7 +57,15 @@ class ApplicationSolar : public Application {
 
   //container for stars
   std::vector<float> stars_;
+  //container for textures
+  //std::vector<texture> texContainer_;
+  std::vector<pixel_data> texContainer_;
 
+  //container to store texture objects
+  std::vector<texture_object> texObj_;
+
+
+  //lightsource for solarsystem 
   PointLightNode light_;
 
   //ShaderMode for switching between blinn phong and cell-shading
