@@ -110,9 +110,12 @@ float Node::getSelfRotation() const {
 void Node::setPlanetColor(glm::vec3 const& col) {
     planetCol_ = col;
 }
-/*
-std::shared_ptr<Node> Node::getFirstChild(std::shared_ptr<Node> i) const {
-    auto list = i->getListOfChildren();
-    auto it = list.begin();
-    return *it;
-}*/
+
+void Node::setPlanetTex(texture_object const& tex) {
+    planetTex_ = tex;
+}
+
+texture_object Node::getPlanetTex() const {
+    return planetTex_;
+}
+

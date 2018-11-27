@@ -1,6 +1,7 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 
+#include "structs.hpp"
 #include <string>
 #include <list>
 #include <glm/mat4x4.hpp>
@@ -38,6 +39,8 @@ class Node {
         glm::vec3 getPlanetColor() const;
         void setPlanetColor(glm::vec3 const& col);
         float getSelfRotation() const;
+        void setPlanetTex(texture_object const& tex);
+        texture_object getPlanetTex() const;
 
     private:
        std::shared_ptr<Node> parent_;
@@ -54,6 +57,8 @@ class Node {
         float distanceToOrigin_;
         float selfRotation_;
         glm::vec3 planetCol_;
+        //texture for planet
+        texture_object planetTex_;
 
 }; 
 #endif
