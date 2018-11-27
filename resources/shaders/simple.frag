@@ -3,10 +3,14 @@
 in vec3 pass_Normal;
 in vec3 pass_VertPos;
 in vec3 pass_eyePos;
-//flat in int shader_Mode;
+in vec2 pass_TexCoord;
+
 
 //is defined by glUniform3f
 uniform vec3 PlanetColor;
+
+//texture of planet
+uniform sampler2D Texture;
 
 uniform float LightIntensity;
 uniform vec3 LightColor;
@@ -16,13 +20,16 @@ uniform int ShaderMode;
 
 out vec4 out_Color;
 
-vec3 diffuse = PlanetColor;
-vec3 ambient = vec3(0.1,0.0,0.0); // indirct light coming from the surrounding
+vec4 texColor = texture(Texture, pass_TexCoord);
+vec3 diffuse = texColor.rgb;
+
+//vec3 diffuse = PlanetColor;
+vec3 ambient = diffuse;//vec3(0.1,0.0,0.0); // indirct light coming from the surrounding
 const vec3 specularColor = vec3(1.0, 1.0, 1.0); // color of the specular highlights
 const vec3 lightPos = vec3(0.0, 0.0, 0.0);
 
 const float M_pi = 3.1415926535897932384626433832795;
-const float reflect = 2.5;
+const float reflect = 0.9; //should be between 0 and 1
 const float shineness = 4.0;
 
 
@@ -44,12 +51,10 @@ void main() {
 
      // Blinn-Phong Model
 
-     // if(lambertian > 0.0) {
         vec3 viewDir = normalize(-pass_VertPos); // view direction
         vec3 halfway = normalize(lightDir + viewDir); // halfway vector
-        float specAngle = max(dot(halfway, normal),0.0); // rho
+        float specAngle = max(dot(halfway, normal),0.0); 
         spec = pow(specAngle, 4*shineness); // calculate specular reflection if the surface is oriented to the light source
-     // }
 
       // calculate planet color
       vec3 linear_Color = ambient + diffuse*lambertian*beta*reflectivity + specularColor*spec*beta;
@@ -61,7 +66,7 @@ void main() {
 
       // Cell-Shading-Model
 
-       vec3 eye_dir = normalize( -pass_eyePos); // eye direction
+      vec3 eye_dir = normalize( -pass_eyePos); // eye direction
       float view_angle = dot(eye_dir, normal);
 
       //float normal_View_Angle = dot(-normalize(pass_VertPos), normalize(pass_Normal));
@@ -79,7 +84,7 @@ void main() {
 
 
       // highlight the planets border in a different color
-      if(abs(view_angle) < 0.4) {
+      if(abs(view_angle) < 0.4) { //better with clamp
         out_Color = vec4(1.0, 1.0, 1.0,1.0);
       } 
       else {

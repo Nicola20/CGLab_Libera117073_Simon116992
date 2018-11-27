@@ -4,18 +4,20 @@
 // vertex attributes of VAO
 layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
+layout(location = 2) in vec2 in_TexCoord;
 
 //Matrix Uniforms as specified with glUniformMatrix4fv
 uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 uniform mat4 NormalMatrix;
-//uniform int ShaderMode;
+
 
 out vec3 pass_Normal;
 out vec3 pass_VertPos;
 out vec3 pass_eyePos;
-//flat out int shader_Mode;
+out vec2 pass_TexCoord;
+
 
 void main(void)
 {
@@ -28,6 +30,6 @@ void main(void)
 	//computes position of the vertice
 	vec4 vertPos4 = ModelMatrix* vec4(in_Position, 1.0);
 	pass_VertPos = vec3 (vertPos4/vertPos4.w);
+	pass_TexCoord = in_TexCoord;
 
-	//shader_Mode = ShaderMode;
 }
