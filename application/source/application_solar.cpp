@@ -62,42 +62,52 @@ SceneGraph ApplicationSolar::initializeSceneGraph() const {
   GeometryNode sun {"sun", 0, 1.0f, 0.0f, 0.0f, 0.0f};
   sun.setLocalTransform(local);
   sun.setPlanetColor(glm::vec3{1.0, 0.5, 0.2});
+  sun.setPlanetTex(texObj_[0]);
 
   GeometryNode mercury {"mercury", 1, 0.383f, 3.012f, 2.0f, 1.0f};
   mercury.setLocalTransform(local);
-  mercury.setPlanetColor(glm::vec3{0.4, 0.5, 0.5}); 
+  mercury.setPlanetColor(glm::vec3{0.4, 0.5, 0.5});
+  mercury.setPlanetTex(texObj_[1]); 
 
   GeometryNode venus{"venus",1, 0.950f, 1.177f, 3.723f, 1.0f};
   venus.setLocalTransform(local);
   venus.setPlanetColor(glm::vec3{0.5, 0.8, 0.0});
+  venus.setPlanetTex(texObj_[2]);
 
   GeometryNode earth{"earth", 1, 1.0f, 1.0f, 5.0f, 1.0f};
   earth.setLocalTransform(local); 
   earth.setPlanetColor(glm::vec3{0.0, 0.8, 0.3});
+  earth.setPlanetTex(texObj_[3]);
 
   GeometryNode moon{"moon", 2, 0.003f, 1.0f, 7.01f, 1.0f};
   moon.setLocalTransform(local);
   moon.setPlanetColor(glm::vec3{0.8, 0.8, 0.8});
+  moon.setPlanetTex(texObj_[4]);
 
   GeometryNode mars{"mars",1, 0.583f, 0.53f, 9.524f,1.0f};
   mars.setLocalTransform(local);
   mars.setPlanetColor(glm::vec3{0.8, 0.0, 0.0});
+  mars.setPlanetTex(texObj_[5]);
 
   GeometryNode jupiter{"jupiter", 1, 10.97f, 0.084f, 11.2f, 1.0};
   jupiter.setLocalTransform(local);
   jupiter.setPlanetColor(glm::vec3{0.7, 0.5, 0.1});
+  jupiter.setPlanetTex(texObj_[6]);
 
   GeometryNode saturn{"saturn", 1, 9.14f, 0.0339f, 13.54f, 1.0};
   saturn.setLocalTransform(local);
   saturn.setPlanetColor(glm::vec3{0.9, 0.8, 0.5});
+  saturn.setPlanetTex(texObj_[7]);
 
   GeometryNode uranus{"uranus", 1, 3.98f, 0.0119f, 15.19f, 1.0};
   uranus.setLocalTransform(local);
   uranus.setPlanetColor(glm::vec3{0.7, 0.8, 1.0});
+  uranus.setPlanetTex(texObj_[8]);
 
   GeometryNode neptune{"neptune",1, 3.87f, 0.6f, 17.1f, 1.0};
   neptune.setLocalTransform(local);
   neptune.setPlanetColor(glm::vec3{0.0, 0.2, 1.0});
+  neptune.setPlanetTex(texObj_[9]);
 
   //PointLightNode light{10.0f, glm::vec3{1.0f, 1.0f, 1.0f}};
 
@@ -140,6 +150,7 @@ void ApplicationSolar::planetRendering() const {
 
   //go through all the children of the rootnode
   for (auto& i: solar_.getRoot()->getListOfChildren()) {
+    int count = 0;
 
         //we have to handle the sun a bit different since its not moving
         if (i->getName() == "sun") {
@@ -151,6 +162,15 @@ void ApplicationSolar::planetRendering() const {
           //sending planetcolor at the shader since uniform is only accepting floats we have to split the color vec3
           glm::vec3 planetcol = i->getPlanetColor();
           glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), planetcol.x, planetcol.y, planetcol.z);
+
+          // activate the proper Texture Unit
+          glActiveTexture(GL_TEXTURE0);
+          // bind the proper texture object
+          glBindTexture(GL_TEXTURE_2D, i->getPlanetTex().handle);
+          // location of the sampler uniform for shader
+          int sampler_location = glGetUniformLocation(m_shaders.at("planet").handle, "Texture");
+          // upload index of unit to sampler
+          glUniform1i(sampler_location, 0);
 
           //ShaderMode
           glUniform1i(m_shaders.at("planet").u_locs.at("ShaderMode"), shader_Mode);
@@ -168,6 +188,7 @@ void ApplicationSolar::planetRendering() const {
 
         // draw bound vertex array using bound shader
         glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
+        count +=1;
 
         } else  {
 
@@ -194,6 +215,14 @@ void ApplicationSolar::planetRendering() const {
          //gives planet specific color - first parameter is location in fragment shader second to forth are the color values
          glm::vec3 planetcol = i->getPlanetColor();
           glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), planetcol.x, planetcol.y, planetcol.z);
+          // activate the proper Texture Unit
+          glActiveTexture(GL_TEXTURE0);
+          // bind the proper texture object
+          glBindTexture(GL_TEXTURE_2D, i->getPlanetTex().handle);
+          // location of the sampler uniform for shader
+          int sampler_location = glGetUniformLocation(m_shaders.at("planet").handle, "Texture");
+          // upload index of unit to sampler
+          glUniform1i(sampler_location, 0);
 
         //Shader Mode
          glUniform1i(m_shaders.at("planet").u_locs.at("ShaderMode"), shader_Mode);
@@ -208,7 +237,7 @@ void ApplicationSolar::planetRendering() const {
 
         // draw bound vertex array using bound shader
         glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
-
+          count +=1;
 
 
           //check if the current planet has moons surounding it
@@ -228,8 +257,17 @@ void ApplicationSolar::planetRendering() const {
 
                   //gives planet specific color - first parameter is location in fragment shader second to forth are the color values
                   glm::vec3 mooncol = moon->getPlanetColor();
-                    glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mooncol.x, mooncol.y, mooncol.z);
-                  
+                  glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mooncol.x, mooncol.y, mooncol.z);
+
+                  // activate the proper Texture Unit
+                  glActiveTexture(GL_TEXTURE0);
+                  // bind the proper texture object
+                  glBindTexture(GL_TEXTURE_2D, i->getPlanetTex().handle);
+                  // location of the sampler uniform for shader
+                  int sampler_location = glGetUniformLocation(m_shaders.at("planet").handle, "Texture");
+                  // upload index of unit to sampler
+                  glUniform1i(sampler_location, 0);
+                          
                   //ShaderMode
                   glUniform1i(m_shaders.at("planet").u_locs.at("ShaderMode"), shader_Mode);
 
@@ -252,9 +290,11 @@ void ApplicationSolar::planetRendering() const {
 
                   // draw bound vertex array using bound shader
                   glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
+                  count +=1;
             }
           }
         }
+        
   }
 }
 
@@ -442,7 +482,20 @@ void ApplicationSolar::initializeGeometry() {
   glEnableVertexAttribArray(1);
   // second attribute is 3 floats with no offset & stride
   glVertexAttribPointer(1, model::NORMAL.components, model::NORMAL.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::NORMAL]);
+/*
+  // activate third attribute on gpu
+  glEnableVertexAttribArray(2);
+  // second attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(2, model::NORMAL.components, model::NORMAL.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::NORMAL]);
+*/
 
+	// Add texture coordinates as attribute _ ass4
+	// activate third attribute on gpu
+	glEnableVertexAttribArray(2);
+	// third attribute is 3 floats with no offset & stride 
+  glVertexAttribPointer(2, model::TEXCOORD.components, model::TEXCOORD.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::TEXCOORD]); 
+   
+   
    // generate generic buffer
   glGenBuffers(1, &planet_object.element_BO);
   // bind this as an vertex array buffer containing all attributes
