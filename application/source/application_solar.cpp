@@ -167,9 +167,11 @@ void ApplicationSolar::planetRendering() const {
           glActiveTexture(GL_TEXTURE0);
           // bind the proper texture object
           glBindTexture(GL_TEXTURE_2D, i->getPlanetTex().handle);
+          std::cout<<"sun texture \n";
           // location of the sampler uniform for shader
           int sampler_location = glGetUniformLocation(m_shaders.at("planet").handle, "Texture");
           // upload index of unit to sampler
+          glUseProgram(m_shaders.at("planet").handle);
           glUniform1i(sampler_location, 0);
 
           //ShaderMode
@@ -272,7 +274,7 @@ void ApplicationSolar::planetRendering() const {
                   glUniform1i(m_shaders.at("planet").u_locs.at("ShaderMode"), shader_Mode);
 
                   /* set lighting for planet */
-                 glm::vec3 moonpointlightcol = light_.getColor();
+                  glm::vec3 moonpointlightcol = light_.getColor();
                   glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), moonpointlightcol.x, moonpointlightcol.y, moonpointlightcol.z);
                   glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light_.getLightIntensity());
                   
@@ -300,7 +302,7 @@ void ApplicationSolar::planetRendering() const {
 
 //does the actual drawing of the stars
 void ApplicationSolar::drawStars() const {
-  std::cout<<"drawStars called\n";
+  std::cout<<"drawStars called \n";
   glUseProgram(m_shaders.at("star").handle);
 
   // bind the VAO to draw
@@ -338,15 +340,25 @@ void ApplicationSolar::loadTextures() {
 
 
   texContainer_.push_back(sun);
+  std::cout<<"loaded sun texture \n";
   texContainer_.push_back(mercury);
+  std::cout<<"loaded mercury texture \n";
   texContainer_.push_back(venus);
+  std::cout<<"loaded venus texture \n";
   texContainer_.push_back(earth);
+  std::cout<<"loaded earth texture \n";
   texContainer_.push_back(moon);
+  std::cout<<"loaded moon texture \n";
   texContainer_.push_back(mars);
+  std::cout<<"loaded mars texture \n";
   texContainer_.push_back(jupiter);
+  std::cout<<"loaded jupiter texture \n";
   texContainer_.push_back(saturn);
+  std::cout<<"loaded saturn texture \n";
   texContainer_.push_back(uranus);
+  std::cout<<"loaded uranus texture \n";
   texContainer_.push_back(neptune);
+  std::cout<<"loaded neptune texture \n";
 }
 
 void ApplicationSolar::initializeTextures() {
@@ -367,12 +379,15 @@ void ApplicationSolar::initializeTextures() {
     //texture filtering set to linear
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
     /*define texture data and format*/
-    glTexImage2D(GL_TEXTURE_2D, 0, texContainer_[i].channels, texContainer_[i].width, texContainer_[i].height,
-                0,texContainer_[i].channels,texContainer_[i].channel_type, &texContainer_[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0, texContainer_[i].channels, (GLsizei)texContainer_[i].width, (GLsizei)texContainer_[i].height,
+                0,texContainer_[i].channels,texContainer_[i].channel_type, texContainer_[i].ptr());
 
     texObj_.push_back(texture);
+    std::cout<<"initialised texture\n";
   }
   
 }
@@ -457,7 +472,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 
 // load models -> is know more like initializePlanets
 void ApplicationSolar::initializeGeometry() {
-  model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
+  model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL | model::TEXCOORD);
 
   // generate vertex array object
   glGenVertexArrays(1, &planet_object.vertex_AO);std::cout<<"hello there general kenobi\n";
