@@ -325,10 +325,10 @@ void ApplicationSolar::drawStars() const {
 void ApplicationSolar::drawSkybox() const {
   glDepthMask(GL_FALSE);
   glUseProgram(m_shaders.at("skybox").handle);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_tex_obj.handle);
-  glBindVertexArray(skybox_object.vertex_AO);
-  glDrawElements(skybox_object.draw_mode, skybox_object.num_elements, model::INDEX.type, NULL);
+  glActiveTexture(GL_TEXTURE0);///specifies which texture unit to make active - default initialisation
+  glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_tex_obj.handle);// bind Texture Object to 2d texture binding point of unit
+  glBindVertexArray(skybox_object.vertex_AO); // bind the VAO to draw
+  glDrawElements(skybox_object.draw_mode, skybox_object.num_elements, model::INDEX.type, NULL);// draw bound vertex array using bound shader
   glDepthMask(GL_TRUE);
 }
 
@@ -510,7 +510,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 // load models -> is know more like initializePlanets
 void ApplicationSolar::initializeGeometry() {
   model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL | model::TEXCOORD);
-    model skybox_model = model_loader::obj(m_resource_path + "models/skybox.obj");
+    model skybox_model = model_loader::obj(m_resource_path + "models/skybox.obj");//load skybox model
 
   // generate vertex array object
   glGenVertexArrays(1, &planet_object.vertex_AO);std::cout<<"hello there general kenobi\n";
@@ -624,24 +624,30 @@ void ApplicationSolar::initializeStars(){
 //Assignement 4 initialize skybox
 // load Skybox
 void ApplicationSolar::initializeSkyBox(){
-      glActiveTexture(GL_TEXTURE0);
-      glGenTextures(1, &skybox_tex_obj.handle);
-      glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_tex_obj.handle);
+      glActiveTexture(GL_TEXTURE0);//specifies which texture unit to make active - default initialisatio
+      glGenTextures(1, &skybox_tex_obj.handle);//specifies num of textures to be generated and which
+      glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_tex_obj.handle);//binds texture to target
+
+      // set the wrap parameter for texture coordinate S,T and R
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+      // define interpolation type when fragment does not exactly cover one texel
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      // define interpolation type when fragment covers multiple texels (texture pixels)
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-      for(unsigned int idx = 0; idx < skybox_container.size(); ++idx){ // schauen wegen skyboxcontainer
+      /*define texture data and format*/
+      for(unsigned int idx = 0; idx < skybox_container.size(); ++idx){ 
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + idx, 0, skybox_container[idx].channels, (GLsizei)skybox_container[idx].width,
                     (GLsizei)skybox_container[idx].height, 0, skybox_container[idx].channels,
-                    skybox_container[idx].channel_type, skybox_container[idx].ptr());//vorher ohne & sondern .ptr()
+                    skybox_container[idx].channel_type, skybox_container[idx].ptr());
       }
 
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
 }
+
 
 ///////////////////////////// callback functions for window events ////////////
 // handle key input
