@@ -51,9 +51,14 @@ class ApplicationSolar : public Application {
   void initializeStars();
   void drawStars() const;
 
+  void initializeSkyBox();
+  void drawSkybox() const;
+
   // cpu representation of model
   model_object planet_object;
   model_object star_object;
+  model_object skybox_object;
+  texture_object skybox_tex_obj; 
 
   //container for stars
   std::vector<float> stars_;
@@ -63,6 +68,9 @@ class ApplicationSolar : public Application {
 
   //container to store texture objects
   std::vector<texture_object> texObj_;
+
+  //skybox
+  std::vector<pixel_data> skybox_container;
 
 
   //lightsource for solarsystem 

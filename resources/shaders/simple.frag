@@ -21,7 +21,7 @@ uniform int ShaderMode;
 out vec4 out_Color;
 
 vec4 texColor = texture(Texture, pass_TexCoord);
-vec3 diffuse = texColor.rgb;
+vec3 diffuse = vec3(texColor).xyz;
 
 //vec3 diffuse = PlanetColor;
 vec3 ambient = diffuse;//vec3(0.1,0.0,0.0); // indirct light coming from the surrounding
