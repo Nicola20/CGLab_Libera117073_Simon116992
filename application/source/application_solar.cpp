@@ -29,6 +29,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
 {
   initializeGeometry();
+  initializeFramebuffer();
   loadTextures();
   initializeTextures();
   initializeSkyBox();//skybox
@@ -646,6 +647,53 @@ void ApplicationSolar::initializeSkyBox(){
 
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+}
+
+void ApplicationSolar::initializeFramebuffer() {
+
+  //create renderbuffer
+  //1. generate renderbuffer obj
+  glGenRenderbuffer(1, &ren_obj.handle);
+  //2. bind it for formatting
+  glBindRenderbuffer(GL_RENDERBUFFER, ren_obj.handle);
+  //3. specify properties
+  //establishes data storage, format and dimension of a renderbuffer objects image
+  //internalformat​ specifies the internal format to be used for the renderbuffer object's storage and must be a color-renderable, depth-renderable, or stencil-renderable format
+  glRenderbufferStorage(GL_RENDERBUFFER,);//have to fill this out
+
+  //define the framebuffer
+  glGenFramebuffers(1, &fbo_obj.handle);
+  glBindFramebuffers(GL_FRAMEBUFFER, fbo_obj.handle);
+
+  //bind texture for texture attachement
+  glActiveTexture(GL_TEXTURE0);
+  glGenTextures(1, &fbo_tex.handle);
+  glBindTexture(GL_TEXTURE_2D, fbo_tex.handle);
+
+   //800 and 600 are the screen height and width - not sure wich value to set
+   //only allocating memory for the texture but not really filling it yet - this will happen in the renderer 
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+
+  /*define attachments - we have to make on call for each attachement*/
+  //define texture/color attachement
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, ren_obj.handle);
+
+  //define which buffers to write
+  GLenum draw_buffers[n] = {GL_COLOR_ATTACHMENT0};
+  glDrawBuffers(n, draw_buffers);
+  glDrawBuffers(1, GL_DEPTH_ATTACHEMENT);
+
+  //check that the framebuffer can be written
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    std::cout<<"Framebuffer is not complete\n";
+  } else {
+    std::cout<<"victory dance\n";
+  }
+
 }
 
 
