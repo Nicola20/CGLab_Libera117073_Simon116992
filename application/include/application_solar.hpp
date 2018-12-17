@@ -57,9 +57,6 @@ class ApplicationSolar : public Application {
   void drawSkybox() const;
   void makeQuad() const;
 
-  //initializes framebuffer
-  void initializeFramebuffer();
-
   // cpu representation of model
   model_object planet_object;
   model_object star_object;
