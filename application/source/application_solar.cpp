@@ -161,7 +161,14 @@ void ApplicationSolar::render() const {
   glBindFramebuffer(GL_FRAMEBUFFER, 0); //buffer
 
   //make quad
-  makeQuad();
+  //makeQuad();
+    glUseProgram(m_shaders.at("quad").handle);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D,fb_tex_object.handle);
+  int color_sampler_location = glGetUniformLocation(m_shaders.at("quad").handle, "FramebufferTex");
+  glUniform1i(color_sampler_location, 0);
+  glBindVertexArray(quad_object.vertex_AO);
+glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
   
 
@@ -706,7 +713,7 @@ void ApplicationSolar::initializeFramebuffer() {
   // bind RBO for formatting
   glBindRenderbuffer(GL_RENDERBUFFER, rb_object.handle);
   // specify RBO properties
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 1024, 768);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 600, 480);
 
   // generate Frame Buffer Object
   glGenFramebuffers(1, &fb_object.handle);
@@ -716,7 +723,7 @@ void ApplicationSolar::initializeFramebuffer() {
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1, &fb_tex_object.handle);
   glBindTexture(GL_TEXTURE_2D, fb_tex_object.handle);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1024, 768, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 600, 480, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -739,6 +746,7 @@ void ApplicationSolar::initializeFramebuffer() {
 
 //initialize quad
 void ApplicationSolar::initializeScreenQuad() {
+  /*
   model quad_model = model_loader::obj(m_resource_path + "models/quad.obj", model::TEXCOORD);
 
   glGenVertexArrays(1, &quad_object.vertex_AO);
@@ -762,7 +770,37 @@ void ApplicationSolar::initializeScreenQuad() {
   quad_object.draw_mode = GL_TRIANGLE_STRIP;
   quad_object.num_elements = GLsizei(quad_model.indices.size());
 
-  glBindVertexArray(0);
+  glBindVertexArray(0);*/
+
+
+  // coordinates
+  static const GLfloat quad_data[] = {
+    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // v1
+    1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  // v2
+    -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,  // v4
+    1.0f, 1.0f, 0.0f, 1.0f, 1.0f  // v3
+  };
+
+  // generate vertex array object
+  glGenVertexArrays(1, &quad_object.vertex_AO);
+  // bind the array for attaching buffers
+  glBindVertexArray(quad_object.vertex_AO);
+
+  // generate generic buffer
+  glGenBuffers(1, &quad_object.vertex_BO);
+  // bind this as an vertex array buffer containing all attributes
+  glBindBuffer(GL_ARRAY_BUFFER, quad_object.vertex_BO);
+  // configure currently bound array buffer
+  glBufferData(GL_ARRAY_BUFFER, sizeof(quad_data), quad_data, GL_STATIC_DRAW);
+  
+  // activate first attribute on gpu
+  glEnableVertexAttribArray(0);
+  // first attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(0, model::POSITION.components, model::POSITION.type, GL_FALSE, 5 * sizeof(float), 0);
+  // activate third attribute on gpu
+  glEnableVertexAttribArray(1);
+  // third attribute is 3 floats with no offset & stride
+glVertexAttribPointer(1, model::TEXCOORD.components, model::TEXCOORD.type, GL_FALSE, 5 * sizeof(float), (GLvoid*)(3*sizeof(float)));
 }
 
 
@@ -814,6 +852,7 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
       std::cout<<"ShaderMode = 2\n";
     }
   }
+    /*
   //Post-processing effects 
   //Luminance Preserving Grayscale
   else if (key == GLFW_KEY_7 && action == GLFW_PRESS) {
@@ -849,6 +888,34 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     } else {
       blur_Mode = true;
     }
+  }*/
+    //Post-processing effects 
+  //Luminance Preserving Grayscale
+  
+  else if (key == GLFW_KEY_7 && action == GLFW_PRESS) {
+    greyscale_Mode = !greyscale_Mode;
+    glUseProgram(m_shaders.at("quad").handle);
+    glUniform1i(m_shaders.at("quad").u_locs.at("GreyScaleMode"), greyscale_Mode);
+    uploadView();
+  } // 8: Horizontal Mirroring
+  else if (key == GLFW_KEY_8 && action == GLFW_PRESS) {
+    horizontal_Mode = !horizontal_Mode;
+    glUseProgram(m_shaders.at("quad").handle);
+    glUniform1i(m_shaders.at("quad").u_locs.at("HorizontalMirroringMode"), horizontal_Mode);
+    uploadView();
+  } // 9 : Vertical Mirroring
+  else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
+    vertical_Mode = !vertical_Mode;
+    glUseProgram(m_shaders.at("quad").handle);
+    glUniform1i(m_shaders.at("quad").u_locs.at("VerticalMirroringMode"), vertical_Mode);
+    uploadView();
+  
+  } //blur with 3x3 Gaussian Kernel
+  else if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+    blur_Mode = !blur_Mode;
+    glUseProgram(m_shaders.at("quad").handle);
+    glUniform1i(m_shaders.at("quad").u_locs.at("BlurMode"), blur_Mode);
+    uploadView();
   }
 
 }
