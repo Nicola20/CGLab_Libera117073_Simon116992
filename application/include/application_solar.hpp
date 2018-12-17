@@ -57,6 +57,9 @@ class ApplicationSolar : public Application {
   void drawSkybox() const;
   void makeQuad() const;
 
+  //initializes framebuffer
+  void initializeFramebuffer();
+
   // cpu representation of model
   model_object planet_object;
   model_object star_object;
@@ -87,6 +90,13 @@ class ApplicationSolar : public Application {
 
   //skybox
   std::vector<pixel_data> skybox_container;
+
+  //objects for framebuffer
+  framebuffer_object fbo_obj;
+  renderbuffer_object ren_obj;
+
+  //texture object for framebuffer
+  texture_object fbo_tex;
 
 
   //lightsource for solarsystem 
