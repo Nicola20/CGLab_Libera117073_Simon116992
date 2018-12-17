@@ -37,6 +37,8 @@ class ApplicationSolar : public Application {
  protected:
   void initializeShaderPrograms();
   void initializeGeometry();
+  void initializeFramebuffer();//buffer
+  void initializeScreenQuad();//quad
   //initializes the SceneGraph with all the planets
   SceneGraph initializeSceneGraph() const;
   //initialize textures for further use
@@ -53,12 +55,26 @@ class ApplicationSolar : public Application {
 
   void initializeSkyBox();
   void drawSkybox() const;
+  void makeQuad() const;
 
   // cpu representation of model
   model_object planet_object;
   model_object star_object;
   model_object skybox_object;
   texture_object skybox_tex_obj; 
+
+  // buffer objects
+  renderbuffer_object rb_object;
+  framebuffer_object fb_object;
+
+  texture_object fb_tex_object;
+  texture_object quad_tex_object;
+
+  // quad object
+  model_object quad_object;
+
+  GLenum draw_buffers[1];
+  GLenum status; 
 
   //container for stars
   std::vector<float> stars_;
@@ -78,6 +94,12 @@ class ApplicationSolar : public Application {
 
   //ShaderMode for switching between blinn phong and cell-shading
   int shader_Mode;
+
+  //post-processing effect 
+  bool greyscale_Mode = false;
+  bool horizontal_Mode = false;
+  bool vertical_Mode = false;
+  bool blur_Mode = false;
   
   // camera transform matrix
   glm::fmat4 m_view_transform;

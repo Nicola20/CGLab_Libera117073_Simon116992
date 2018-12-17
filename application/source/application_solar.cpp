@@ -24,11 +24,17 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,planet_object{}
  //,star_object{}
  //,stars_{}
+ ,rb_object{}//renderbuffer
+ ,fb_object{}//framebuffer
+ ,quad_tex_object{}//quad
+ ,quad_object{}//quad
  ,shader_Mode{1} //default mode is 1 or blinn phong
  ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
 {
   initializeGeometry();
+  initializeFramebuffer();//buffer
+  initializeScreenQuad();//quad
   loadTextures();
   initializeTextures();
   initializeSkyBox();//skybox
@@ -137,6 +143,12 @@ SceneGraph ApplicationSolar::initializeSceneGraph() const {
 
 //main method with is doing all the drawing
 void ApplicationSolar::render() const {
+  //eigene Funktion besser?
+  //define renderbuffer
+  glBindFramebuffer(GL_FRAMEBUFFER, fb_object.handle);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
+
   //draw skybox
   drawSkybox();
 
@@ -145,6 +157,13 @@ void ApplicationSolar::render() const {
 
   //draws srars
   drawStars();
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0); //buffer
+
+  //make quad
+  makeQuad();
+
+  
 
 }
 
@@ -325,12 +344,32 @@ void ApplicationSolar::drawStars() const {
 void ApplicationSolar::drawSkybox() const {
   glDepthMask(GL_FALSE);
   glUseProgram(m_shaders.at("skybox").handle);
-  glActiveTexture(GL_TEXTURE0);///specifies which texture unit to make active - default initialisation
-  glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_tex_obj.handle);// bind Texture Object to 2d texture binding point of unit
-  glBindVertexArray(skybox_object.vertex_AO); // bind the VAO to draw
+  glActiveTexture(GL_TEXTURE0);//specifies which texture unit to make active - default initialisation
+  glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_tex_obj.handle);//binds texture to target
+  glBindVertexArray(skybox_object.vertex_AO);// bind the VAO to draw
   glDrawElements(skybox_object.draw_mode, skybox_object.num_elements, model::INDEX.type, NULL);// draw bound vertex array using bound shader
   glDepthMask(GL_TRUE);
 }
+
+//make Quad
+void ApplicationSolar::makeQuad() const {
+  glUseProgram(m_shaders.at("quad").handle);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, fb_tex_object.handle); //bind texture to target
+  //Shadermodi
+  glUniform1i(m_shaders.at("quad").u_locs.at("FramebufferTex"), 0);
+  glUniform1i(m_shaders.at("quad").u_locs.at("HorizontalMirroringMode"), horizontal_Mode);
+  glUniform1i(m_shaders.at("quad").u_locs.at("GreyScaleMode"), greyscale_Mode);
+  glUniform1i(m_shaders.at("quad").u_locs.at("VerticalMirroringMode"), vertical_Mode);
+  glUniform1i(m_shaders.at("quad").u_locs.at("BlurMode"), blur_Mode);
+  
+
+  glBindVertexArray(quad_object.vertex_AO);
+  glDrawArrays(quad_object.draw_mode, 0, quad_object.num_elements);
+
+
+}
+
 
 void ApplicationSolar::loadTextures() {
 
@@ -467,8 +506,19 @@ void ApplicationSolar::uploadUniforms() {
 ///////////////////////////// intialisation functions /////////////////////////
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
+  //quad
   // store shader program objects in container
-  
+  m_shaders.emplace("quad", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/quad.vert"},
+                                           {GL_FRAGMENT_SHADER,m_resource_path + "shaders/quad.frag"}}});
+
+  // request uniform locations for shader program
+  m_shaders.at("quad").u_locs["FramebufferTex"] = -1;
+  m_shaders.at("quad").u_locs["HorizontalMirroringMode"] = -1;
+  m_shaders.at("quad").u_locs["GreyScaleMode"] = -1;
+  m_shaders.at("quad").u_locs["VerticalMirroringMode"] = -1;
+  m_shaders.at("quad").u_locs["BlurMode"] = -1;
+
+  // store shader program objects in container
   m_shaders.emplace("planet", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/simple.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/simple.frag"}}});
 
@@ -627,6 +677,7 @@ void ApplicationSolar::initializeSkyBox(){
       glActiveTexture(GL_TEXTURE0);//specifies which texture unit to make active - default initialisatio
       glGenTextures(1, &skybox_tex_obj.handle);//specifies num of textures to be generated and which
       glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_tex_obj.handle);//binds texture to target
+                    
 
       // set the wrap parameter for texture coordinate S,T and R
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -646,6 +697,73 @@ void ApplicationSolar::initializeSkyBox(){
 
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
       glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+}
+
+
+//Abgabe 5 framebuffer
+void ApplicationSolar::initializeFramebuffer() {
+  // generate Renderbuffer Object
+  glGenRenderbuffers(1, &rb_object.handle);
+  // bind RBO for formatting
+  glBindRenderbuffer(GL_RENDERBUFFER, rb_object.handle);
+  // specify RBO properties
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 1024, 768);
+
+  // generate Frame Buffer Object
+  glGenFramebuffers(1, &fb_object.handle);
+  //bind FBO for configuration
+  glBindFramebuffer(GL_FRAMEBUFFER, fb_object.handle);
+
+  glActiveTexture(GL_TEXTURE0);
+  glGenTextures(1, &fb_tex_object.handle);
+  glBindTexture(GL_TEXTURE_2D, fb_tex_object.handle);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1024, 768, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  // specify Texture Object attachments
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fb_tex_object.handle, 0);
+  //specify Renderbuffer Object attachments
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb_object.handle);
+
+  //create array containing enums representing color attachments
+  draw_buffers[0] = {GL_COLOR_ATTACHMENT0};
+  //set these color attachments to receive fragments
+  glDrawBuffers(1, draw_buffers);
+  //get the FBO status
+  status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  //compare return value with the valid status value
+  if(status != GL_FRAMEBUFFER_COMPLETE) {
+    std::cout << "FRAMEBUFFER not Complete" << std::endl;
+  }
+}
+
+//initialize quad
+void ApplicationSolar::initializeScreenQuad() {
+  model quad_model = model_loader::obj(m_resource_path + "models/quad.obj", model::TEXCOORD);
+
+  glGenVertexArrays(1, &quad_object.vertex_AO);
+  // bind the array for attaching buffers
+  glBindVertexArray(quad_object.vertex_AO);
+  // generate generic buffer
+  glGenBuffers(1, &quad_object.vertex_BO);
+  // bind this as an vertex array buffer containing all attributes
+  glBindBuffer(GL_ARRAY_BUFFER, quad_object.vertex_BO);
+  // configure currently bound array buffer
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * quad_model.data.size(), quad_model.data.data(), GL_STATIC_DRAW);
+  // activate first attribute on gpu
+  glEnableVertexAttribArray(0);
+  // first attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(0, model::POSITION.components, model::POSITION.type, GL_FALSE, quad_model.vertex_bytes, quad_model.offsets[model::POSITION]);
+
+  glEnableVertexAttribArray(1);
+  // first attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(1, model::TEXCOORD.components, model::TEXCOORD.type, GL_FALSE, quad_model.vertex_bytes, quad_model.offsets[model::TEXCOORD]);
+
+  quad_object.draw_mode = GL_TRIANGLE_STRIP;
+  quad_object.num_elements = GLsizei(quad_model.indices.size());
+
+  glBindVertexArray(0);
 }
 
 
@@ -696,7 +814,43 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
       shader_Mode = 2;
       std::cout<<"ShaderMode = 2\n";
     }
-}
+  }
+  //Post-processing effects 
+  //Luminance Preserving Grayscale
+  else if (key == GLFW_KEY_7 && action == GLFW_PRESS) {
+    if(greyscale_Mode) {
+      greyscale_Mode = false;
+    } else {
+      greyscale_Mode = true;
+    }
+  }
+
+  //Horizontal Mirroring
+  else if (key == GLFW_KEY_8 && action == GLFW_PRESS) {
+    if(horizontal_Mode) {
+      horizontal_Mode = false;
+    } else {
+      horizontal_Mode = true;
+    }
+  }
+
+  //Vertical Mirroring
+  else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
+    if(vertical_Mode) {
+      vertical_Mode = false;
+    } else {
+      vertical_Mode = true;
+    }
+  }
+
+  //Blur with 3x3 Gaussian Kernel
+  else if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+    if(blur_Mode) {
+      blur_Mode = false;
+    } else {
+      blur_Mode = true;
+    }
+  }
 
 }
 
